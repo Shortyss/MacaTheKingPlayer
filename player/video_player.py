@@ -1,4 +1,6 @@
 import os
+
+from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QGraphicsView, QGraphicsScene
 from PyQt6.QtMultimedia import QMediaPlayer, QAudioOutput
 from PyQt6.QtMultimediaWidgets import QGraphicsVideoItem
@@ -19,6 +21,7 @@ class PlayerWindow(QWidget):
         self.setFocus()
 
         self.setWindowTitle("The King's Player by Shortyss")
+        self.setWindowIcon(QIcon("assets/icons/KingPlayer6.png"))
         self.resize(1280, 720)
         self.setStyleSheet("background-color:black;")
         # media

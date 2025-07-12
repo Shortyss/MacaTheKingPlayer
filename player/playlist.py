@@ -3,13 +3,14 @@ import sys
 import sqlite3
 
 from PyQt6 import QtGui
-from PyQt6.QtGui import QMouseEvent
+from PyQt6.QtGui import QMouseEvent, QIcon
 from PyQt6.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QHBoxLayout, QListWidget, QPushButton,
     QInputDialog, QMessageBox, QLabel, QFileDialog, QListWidgetItem
 )
 from PyQt6.QtCore import Qt, QPoint
 
+from player.frameless_window import FramelessWindow
 
 DB_PATH = "playlist.db"
 
@@ -39,32 +40,28 @@ class FilmListWidget(QListWidget):
         super().__init__(parent)
         self.add_files_callback = add_files_callback
         self.setAcceptDrops(True)
-        self.viewport().setAcceptDrops(True)
-        self.viewport().dragEnterEvent = self.dragEnterEvent
-        self.viewport().dropEvent = self.dropEvent
-
+        self.setDragDropMode(QListWidget.DragDropMode.InternalMove)
+        self.setDefaultDropAction(Qt.DropAction.MoveAction)
+        self.setSelectionMode(QListWidget.SelectionMode.SingleSelection)
 
     def dragEnterEvent(self, event):
-        if event.mimeData().hasUrls():
-            event.accept()
+        if event.mimeData().hasUrls() or event.source() == self:
+            event.acceptProposedAction()
         else:
             event.ignore()
 
     def dragMoveEvent(self, event):
-        if event.mimeData().hasUrls():
-            event.accept()
-        else:
-            event.ignore()
+        event.accept()
 
     def dropEvent(self, event):
         if event.mimeData().hasUrls():
             files = [url.toLocalFile() for url in event.mimeData().urls()]
             if self.add_files_callback:
                 self.add_files_callback(files)
-            event.accept()
+            event.acceptProposedAction()
         else:
-            event.ignore()
-
+            # Pro interní reorder necháme defaultní chování
+            super().dropEvent(event)
 
 
 class PlaylistWindow(QWidget):
@@ -73,6 +70,7 @@ class PlaylistWindow(QWidget):
         self.setAcceptDrops(True)
         self.setEnabled(True)
         self.setWindowTitle("Playlisty")
+        self.setWindowIcon(QIcon("assets/icons/KingPlayer6.png"))
         self.resize(420, 480)
         self.dock_offset = QPoint(0, 0)
         self.player_callback = player_callback
@@ -96,10 +94,10 @@ class PlaylistWindow(QWidget):
         # Filmy vpravo
         film_layout = QVBoxLayout()
         self.film_list = FilmListWidget(add_files_callback=self.add_files_to_current_playlist)
-
         self.film_list.viewport().setAcceptDrops(True)
         self.film_list.viewport().dragEnterEvent = self.film_list.dragEnterEvent
         self.film_list.viewport().dropEvent = self.film_list.dropEvent
+        self.film_list.setDragDropMode(QListWidget.DragDropMode.InternalMove)
 
         self.setWindowOpacity(0.66)
 
@@ -363,6 +361,25 @@ class PlaylistWindow(QWidget):
                             (self.current_playlist_id, f, pos + i))
             con.commit()
         self.load_films()
+
+    def reorder_films(self):
+        # Získat nové pořadí filmů v seznamu
+        new_order = []
+        for i in range(self.film_list.count()):
+            fpath = self.film_list.item(i).data(Qt.ItemDataRole.UserRole)
+            new_order.append(fpath)
+        if not self.current_playlist_id:
+            return
+        # Update pořadí v DB
+        with get_connection() as con:
+            cur = con.cursor()
+            for pos, filename in enumerate(new_order, 1):
+                cur.execute(
+                    "UPDATE playlist_items SET position=? WHERE playlist_id=? AND filename=?",
+                    (pos, self.current_playlist_id, filename)
+                )
+            con.commit()
+        print("Playlist pořadí aktualizováno:", new_order)
 
     def highlight_current_film(self, filepath):
         for i in range(self.film_list.count()):
