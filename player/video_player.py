@@ -1,6 +1,6 @@
 import os
 
-from PyQt6.QtGui import QIcon
+from PyQt6.QtGui import QIcon, QCursor
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QGraphicsView, QGraphicsScene
 from PyQt6.QtMultimedia import QMediaPlayer, QAudioOutput
 from PyQt6.QtMultimediaWidgets import QGraphicsVideoItem
@@ -12,7 +12,7 @@ from PyQt6.QtCore import (
 from .info_overlay import InfoOverlay
 from .overlay import ControlOverlay
 from .playlist import PlaylistWindow, cleanup_default_playlist, get_connection
-
+from player.library.library_window import LibraryWindow
 
 class PlayerWindow(QWidget):
     def __init__(self, parent=None):
@@ -59,6 +59,18 @@ class PlayerWindow(QWidget):
         self.hide_timer = QTimer(self)
         self.hide_timer.setInterval(2000)
         self.hide_timer.timeout.connect(self.slide_out)
+
+        # cursor_hide
+        self.cursor_hide_timer = QTimer(self)
+        self.cursor_hide_timer.setInterval(5000)
+        self.cursor_hide_timer.setSingleShot(True)
+        self.cursor_hide_timer.timeout.connect(self.hide_mouse_cursor)
+
+        self.setMouseTracking(True)
+        self.view.setMouseTracking(True)
+        self.view.viewport().setMouseTracking(True)
+
+        self.view.viewport().installEventFilter(self)
 
         # mouse
         self.view.viewport().installEventFilter(self)
@@ -122,13 +134,17 @@ class PlayerWindow(QWidget):
         if not self.proxy_b.isVisible():
             self.proxy_b.setPos(self.start_b)
 
-
     def eventFilter(self, obj, event):
         if obj is self.view.viewport():
+            # --- kurzor: každá aktivita myši = show + restart timeru ---
+            if event.type() in (QEvent.Type.MouseMove, QEvent.Type.MouseButtonPress, QEvent.Type.MouseButtonRelease,
+                                QEvent.Type.Wheel):
+                self.show_mouse_cursor()
+                self.cursor_hide_timer.start()
+
+            # --- tvoje stávající logika pro ovládání overlay a fullscreen ---
             if event.type() == QEvent.Type.MouseMove:
-                event_type = event.type()
-                if event_type == QEvent.Type.MouseMove:
-                    self.slide_in()
+                self.slide_in()
 
             elif event.type() == QEvent.Type.MouseButtonPress:
                 if event.button() == Qt.MouseButton.LeftButton:
@@ -154,7 +170,6 @@ class PlayerWindow(QWidget):
                     self.setFocus()
 
         return super().eventFilter(obj, event)
-
 
     def slide_in(self):
         self.hide_timer.stop()
@@ -233,6 +248,7 @@ class PlayerWindow(QWidget):
         super().keyReleaseEvent(event)
 
     def handle_key(self, event, repeat=False):
+        self.show_mouse_cursor()
         key = event.key()
         if key == Qt.Key.Key_Right:
             if repeat:
@@ -377,7 +393,11 @@ class PlayerWindow(QWidget):
                 self.playlist_window.highlight_current_film(files[0])
 
     def on_library(self):
-        print("Zpět do knihovny - ve vývoji.")
+        self.show_mouse_cursor()
+        self.cursor_hide_timer.stop()
+        self.hide()
+        self.library_window = LibraryWindow(player_window=self)
+        self.library_window.show()
 
     def on_settings(self):
         print("Otevřít nastavení - ve vývoji.")
@@ -394,6 +414,22 @@ class PlayerWindow(QWidget):
     def _on_media_status_changed(self, status):
         if status == QMediaPlayer.MediaStatus.EndOfMedia:
             self.next_movie()
+
+    def hide_mouse_cursor(self):
+        QCursor.setPos(self.mapToGlobal(self.rect().center()))
+        self.setCursor(Qt.CursorShape.BlankCursor)
+        self.view.setCursor(Qt.CursorShape.BlankCursor)
+        self.view.viewport().setCursor(Qt.CursorShape.BlankCursor)
+
+    def show_mouse_cursor(self):
+        self.setCursor(Qt.CursorShape.ArrowCursor)
+        self.view.setCursor(Qt.CursorShape.ArrowCursor)
+        self.view.viewport().setCursor(Qt.CursorShape.ArrowCursor)
+        self.cursor_hide_timer.start()
+
+    def mouseMoveEvent(self, event):
+        self.show_mouse_cursor()
+        super().mouseMoveEvent(event)
 
 
 class DraggableGraphicsView(QGraphicsView):

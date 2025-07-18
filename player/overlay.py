@@ -220,14 +220,12 @@ class ControlOverlay(QWidget):
                     stop:0.8 #0fd9ff,
                     stop:1 #1fa2ff
                 );
-                box-shadow: 0 0 18px 2px #00ffc828;
             }
         
             QLabel {
                 color: #f8fff8;
                 font-weight: bold;
                 font-size: 11px;
-                text-shadow: 0 0 2px #1f1, 0 0 12px #2ff;
                 background: transparent;
             }
         
@@ -240,13 +238,11 @@ class ControlOverlay(QWidget):
                 border: 1.1px solid #1affb388;
                 min-width: 34px; min-height: 36px; max-height: 40px;
                 color: #eafff7;
-                box-shadow: 0 1px 9px 0 #65f1ff22;
             }
             QPushButton[class="media"]:hover, QPushButton[class="home"]:hover, QPushButton[class="donate"]:hover, QPushButton[class="circle"]:hover{
                 background: qradialgradient(cx:0.5, cy:0.52, radius:0.7, fx:0.5, fy:0.5,
                     stop:0 #41ffe7, stop:0.7 #162c2c, stop:1 transparent);
                 border: 1.5px solid #22ffc6;
-                box-shadow: 0 0 11px 2px #1affb399;
             }
             
             /* Kulatá tlačítka */
@@ -261,8 +257,6 @@ class ControlOverlay(QWidget):
                 border-radius: 16px;
                 border: 1.2px solid #20ffe988;
                 color: #f2fff8;
-                box-shadow: 0 1px 9px 0 #7fefff33;
-                transition: background 0.18s, box-shadow 0.18s;
             }
 
             /* Home & Donate – stejné pozadí, max 10% světlejší, kulaté! */
@@ -273,7 +267,6 @@ class ControlOverlay(QWidget):
                 /* Můžeš lehce zvýšit světlost, třeba: stop:0 #3b4f6d (o 10% světlejší) */
             }
             
-            /* Ikony: světlejší barva */
             QPushButton > * {
                 color: #eafff7;
             }
@@ -290,7 +283,6 @@ class ControlOverlay(QWidget):
                 font-size: 10px;
                 border-radius: 4px;
                 padding: 4px 4px;
-                box-shadow: 0 1px 12px #36ffd8a2;
             }
          
             QSlider::sub-page:horizontal {
@@ -299,14 +291,12 @@ class ControlOverlay(QWidget):
                     stop:0 #81f7ff, stop:1 #aaff00
                 );
                 border-radius: 4px;
-                box-shadow: 0 0 24px 8px #aaff00cc;
             }
             QSlider::handle:horizontal {
                 background: #f8fff8;
                 width: 8px; height: 8px;
                 border-radius: 3px;
                 border: 2px solid #c0ff95;
-                box-shadow: 0 0 14px 3px #d8ffd4;
             }
         """)
 

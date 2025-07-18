@@ -1,43 +1,83 @@
+import os
 import sys
-from PyQt6.QtWidgets import QApplication, QListWidget, QVBoxLayout, QWidget
+import mpv
 from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QPushButton, QApplication
 
-class TestPlaylist(QListWidget):
-    def __init__(self):
+os.environ["LC_NUMERIC"] = "C"
+os.environ["QT_QPA_PLATFORM"] = "wayland"
+
+class MpvPlayer(QMainWindow):
+    def __init__(self, video_path):
         super().__init__()
-        self.setAcceptDrops(True)
-        self.setDragDropMode(QListWidget.DragDropMode.InternalMove)
-        self.setDefaultDropAction(Qt.DropAction.MoveAction)
-        self.setSelectionMode(QListWidget.SelectionMode.SingleSelection)
+        self.setWindowTitle("MacaTheKingPlayer")
+        self.resize(800, 600)
 
-    def dragEnterEvent(self, event):
-        if event.mimeData().hasUrls() or event.source() == self:
-            event.acceptProposedAction()
-        else:
-            event.ignore()
+        self.mpv_widget = QWidget(self)
+        self.setCentralWidget(self.mpv_widget)
 
-    def dropEvent(self, event):
-        # Pro externí soubory
-        if event.mimeData().hasUrls():
-            files = [url.toLocalFile() for url in event.mimeData().urls()]
-            for file in files:
-                self.addItem(file)
-            event.acceptProposedAction()
-        else:
-            # Vnitřní přesun – nech defaultní chování
-            super().dropEvent(event)
+        self.layout = QVBoxLayout(self.mpv_widget)
+        self.play_pause_button = QPushButton("Play/Pause", self)
+        self.stop_button = QPushButton("Stop", self)
+        self.layout.addWidget(self.play_pause_button)
+        self.layout.addWidget(self.stop_button)
 
-class TestWindow(QWidget):
-    def __init__(self):
-        super().__init__()
-        self.setWindowTitle("Test Drag & Drop Playlist")
-        self.resize(400, 400)
-        layout = QVBoxLayout(self)
-        self.playlist = TestPlaylist()
-        layout.addWidget(self.playlist)
+        self.play_pause_button.clicked.connect(self.toggle_play_pause)
+        self.stop_button.clicked.connect(self.stop)
+
+        self.mpv = None
+        self.video_path = video_path
+        self.initialize_mpv()
+
+    def initialize_mpv(self):
+        try:
+            self.mpv = mpv.MPV(
+                vo='x11',
+                hwdec='auto',
+                log_handler=print,
+                loglevel='info'
+            )
+            self.mpv.play(self.video_path)
+        except Exception as e:
+            print(f"Chyba při inicializaci MPV: {e}")
+            sys.exit(1)
+
+    def toggle_play_pause(self):
+        if not self.mpv:
+            print("MPV není inicializováno.")
+            return
+        try:
+            if self.mpv.pause:
+                self.mpv.pause = False
+                self.play_pause_button.setText("Pause")
+            else:
+                self.mpv.pause = True
+                self.play_pause_button.setText("Play")
+        except mpv.ShutdownError:
+            print("MPV core byl ukončen.")
+            self.mpv = None
+
+    def stop(self):
+        if not self.mpv:
+            print("MPV není inicializováno.")
+            return
+        try:
+            self.mpv.command('stop')
+            self.play_pause_button.setText("Play")
+        except mpv.ShutdownError:
+            print("MPV core byl ukončen.")
+            self.mpv = None
+
+    def closeEvent(self, event):
+        if self.mpv:
+            try:
+                self.mpv.terminate()
+            except mpv.ShutdownError:
+                pass
+        event.accept()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    w = TestWindow()
-    w.show()
+    player = MpvPlayer('/run/media/maca/Filmy a Serialy/Komedie/Taxi 2.mp4')
+    player.show()
     sys.exit(app.exec())

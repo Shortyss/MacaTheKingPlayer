@@ -35,6 +35,18 @@ def get_connection():
     con.commit()
     return con
 
+def init_settings_table():
+    with get_connection() as con:
+        cur = con.cursor()
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS settings (
+                key TEXT PRIMARY KEY,
+                value TEXT
+            )
+        """)
+        con.commit()
+
+
 class FilmListWidget(QListWidget):
     def __init__(self, parent=None, add_files_callback=None):
         super().__init__(parent)
@@ -60,8 +72,23 @@ class FilmListWidget(QListWidget):
                 self.add_files_callback(files)
             event.acceptProposedAction()
         else:
-            # Pro interní reorder necháme defaultní chování
             super().dropEvent(event)
+            if self.parent() and hasattr(self.parent(), "reorder_films"):
+                self.parent().reorder_films()
+
+
+def set_setting(key, value):
+    with get_connection() as con:
+        cur = con.cursor()
+        cur.execute("INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)", (key, value))
+        con.commit()
+
+def get_setting(key, default=None):
+    with get_connection() as con:
+        cur = con.cursor()
+        cur.execute("SELECT value FROM settings WHERE key=?", (key,))
+        row = cur.fetchone()
+        return row[0] if row else default
 
 
 class PlaylistWindow(QWidget):
@@ -187,16 +214,27 @@ class PlaylistWindow(QWidget):
 
             rows = list(con.execute("SELECT id, name FROM playlists ORDER BY name"))
 
-            for row_id, name in rows:
-                item_text = "Default" if name == "_DEFAULT_" else name
+        for row_id, name in rows:
+            item_text = "Default" if name == "_DEFAULT_" else name
+            item = QListWidgetItem(item_text)
+            item.setData(Qt.ItemDataRole.UserRole, row_id)
+            self.playlist_list.addItem(item)
 
-                item = QListWidgetItem(item_text)
-                item.setData(Qt.ItemDataRole.UserRole, row_id)
-                self.playlist_list.addItem(item)
+        # ---- TADY přijde nastavení na poslední vybraný playlist ----
+        last_id = get_setting("last_playlist_id", None)
+        found = False
+        if last_id is not None:
+            for i in range(self.playlist_list.count()):
+                item = self.playlist_list.item(i)
+                if str(item.data(Qt.ItemDataRole.UserRole)) == str(last_id):
+                    self.playlist_list.setCurrentRow(i)
+                    found = True
+                    break
 
-        if self.playlist_list.count() > 0:
+        if not found and self.playlist_list.count() > 0:
             self.playlist_list.setCurrentRow(0)
-            self.load_films()
+
+        self.load_films()
 
     def add_playlist(self):
         name, ok = QInputDialog.getText(self, "Nový playlist", "Zadej název:")
@@ -277,6 +315,7 @@ class PlaylistWindow(QWidget):
                 self.film_list.addItem(fitem)
         if self.current_playing_file:
             self.highlight_current_film(self.current_playing_file)
+        set_setting("last_playlist_id", str(self.current_playlist_id))
 
     def ensure_playlist_exists(self):
         with get_connection() as con:
