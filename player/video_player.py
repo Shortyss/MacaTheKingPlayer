@@ -70,8 +70,6 @@ class PlayerWindow(QWidget):
         self.view.setMouseTracking(True)
         self.view.viewport().setMouseTracking(True)
 
-        self.view.viewport().installEventFilter(self)
-
         # mouse
         self.view.viewport().installEventFilter(self)
         self._single_click_timer = QTimer(self)
@@ -135,6 +133,9 @@ class PlayerWindow(QWidget):
             self.proxy_b.setPos(self.start_b)
 
     def eventFilter(self, obj, event):
+        if not self.isVisible():
+            return super().eventFilter(obj, event)
+
         if obj is self.view.viewport():
             # --- kurzor: každá aktivita myši = show + restart timeru ---
             if event.type() in (QEvent.Type.MouseMove, QEvent.Type.MouseButtonPress, QEvent.Type.MouseButtonRelease,
@@ -305,7 +306,6 @@ class PlayerWindow(QWidget):
         print("Díky, právě jsi mě skoro rozbrečel radostí!")
 
     def on_playlist_closed(self):
-        print("Playlist okno bylo zavřeno, resetuji referenci.")
         self.playlist_window = None
 
     def show_playlist(self):
@@ -393,8 +393,8 @@ class PlayerWindow(QWidget):
                 self.playlist_window.highlight_current_film(files[0])
 
     def on_library(self):
-        self.show_mouse_cursor()
         self.cursor_hide_timer.stop()
+        self.setCursor(Qt.CursorShape.ArrowCursor)
         self.hide()
         self.library_window = LibraryWindow(player_window=self)
         self.library_window.show()
@@ -430,6 +430,10 @@ class PlayerWindow(QWidget):
     def mouseMoveEvent(self, event):
         self.show_mouse_cursor()
         super().mouseMoveEvent(event)
+
+    def showEvent(self, event):
+        super().showEvent(event)
+        self.cursor_hide_timer.start()
 
 
 class DraggableGraphicsView(QGraphicsView):
