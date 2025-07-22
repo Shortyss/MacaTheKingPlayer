@@ -6,7 +6,7 @@ class InfoOverlay(QWidget):
         super().__init__(parent)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.setAttribute(Qt.WidgetAttribute.WA_NoSystemBackground)
-        self.setWindowFlags(Qt.WindowType.Widget)  # DŮLEŽITÉ: není to okno, neblokuje focus!
+        self.setWindowFlags(Qt.WindowType.Widget)
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -32,7 +32,7 @@ class InfoOverlay(QWidget):
         self.timer.setSingleShot(True)
         self.timer.timeout.connect(self.hide)
 
-        self.hide()  # Začíná schovaný
+        self.hide()
 
     def show_message(self, text, timeout=1100):
         self.label.setText(text)

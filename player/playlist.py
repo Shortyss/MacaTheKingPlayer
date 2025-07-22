@@ -1,16 +1,13 @@
 import os.path
-import sys
 import sqlite3
 
 from PyQt6 import QtGui
-from PyQt6.QtGui import QMouseEvent, QIcon
-from PyQt6.QtWidgets import (
-    QApplication, QWidget, QVBoxLayout, QHBoxLayout, QListWidget, QPushButton,
+from PyQt6.QtGui import QIcon
+from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QListWidget, QPushButton,
     QInputDialog, QMessageBox, QLabel, QFileDialog, QListWidgetItem
 )
 from PyQt6.QtCore import Qt, QPoint
 
-from player.frameless_window import FramelessWindow
 
 DB_PATH = "playlist.db"
 
@@ -130,7 +127,7 @@ class PlaylistWindow(QWidget):
 
         self.setStyleSheet("""
             QWidget {
-                background: rgba(34, 43, 66, 100);  /* průhledné tmavé „sklo“ */
+                background: rgba(34, 43, 66, 100); 
                 border-radius: 20px;
                 color: #eafff7;
                 font-family: Segoe UI, Arial, sans-serif;
@@ -143,13 +140,13 @@ class PlaylistWindow(QWidget):
                 color: #f8fff8;
                 font-size: 15px;
                 padding: 5px;
-                selection-background-color: #41ffe7; /* hover barva tlačítka */
-                selection-color: #000000;            /* tmavý text */
+                selection-background-color: #41ffe7; 
+                selection-color: #000000;    
                 outline: none;
             }
             QListWidget::item:selected {
-                background: #22ffc6;  /* stejná barva jako hover na tlačítku */
-                color: #000000;       /* tmavý text */
+                background: #22ffc6;  
+                color: #000000;      
                 border-radius: 8px;
             }
             QPushButton {
@@ -159,7 +156,7 @@ class PlaylistWindow(QWidget):
                 );
                 border-radius: 14px;
                 border: 1.2px solid #20ffe988;
-                color: #000000;   /* tmavý antracitový text */
+                color: #000000;  
                 font-weight: bold;
                 min-width: 90px; min-height: 30px;
                 margin-top: 4px;
@@ -171,7 +168,7 @@ class PlaylistWindow(QWidget):
                     stop:0 #41ffe7, stop:0.7 #162c2c, stop:1 transparent
                 );
                 border: 1.8px solid #22ffc6;
-                color: #000000;   /* tmavý text i při hoveru */
+                color: #000000;  
             }
             QLabel {
                 color: #aaf0fc;
@@ -194,7 +191,7 @@ class PlaylistWindow(QWidget):
         layout.addLayout(playlist_layout, 1)
         layout.addLayout(film_layout, 2)
 
-        # Connect signály
+        # Connect signals
         self.btn_add_playlist.clicked.connect(self.add_playlist)
         self.btn_delete_playlist.clicked.connect(self.delete_playlist)
         self.btn_rename_playlist.clicked.connect(self.rename_playlist)
@@ -220,7 +217,7 @@ class PlaylistWindow(QWidget):
             item.setData(Qt.ItemDataRole.UserRole, row_id)
             self.playlist_list.addItem(item)
 
-        # ---- TADY přijde nastavení na poslední vybraný playlist ----
+        # poslední vybraný playlist
         last_id = get_setting("last_playlist_id", None)
         found = False
         if last_id is not None:
@@ -269,7 +266,6 @@ class PlaylistWindow(QWidget):
                 con.execute("DELETE FROM playlist_items WHERE playlist_id=?", (playlist_id,))
                 con.execute("DELETE FROM playlists WHERE id=?", (playlist_id,))
 
-            # Místo load_playlists() jen odebereme položku ze seznamu
             self.playlist_list.takeItem(row)
 
     def rename_playlist(self):
@@ -281,10 +277,7 @@ class PlaylistWindow(QWidget):
         old_name = item.text()
         new_name, ok = QInputDialog.getText(self, "Přejmenovat", "Nový název:", text=old_name)
 
-        # Pokud uživatel kliknul OK a zadal nějaký text
         if ok and new_name and new_name != old_name:
-
-            # KONTROLA NAVÍC: Zabráníme přejmenování na "Default"
             if new_name.lower() == 'default':
                 QMessageBox.warning(self, "Chyba", "Název 'Default' je rezervovaný a nelze ho použít.")
                 return
@@ -324,7 +317,6 @@ class PlaylistWindow(QWidget):
             row = cur.fetchone()
             if row:
                 return row[0]
-            # Pokud není playlist, vytvoř default
             cur.execute("INSERT INTO playlists (name) VALUES ('_DEFAULT_')")
             con.commit()
             return cur.lastrowid
@@ -402,14 +394,12 @@ class PlaylistWindow(QWidget):
         self.load_films()
 
     def reorder_films(self):
-        # Získat nové pořadí filmů v seznamu
         new_order = []
         for i in range(self.film_list.count()):
             fpath = self.film_list.item(i).data(Qt.ItemDataRole.UserRole)
             new_order.append(fpath)
         if not self.current_playlist_id:
             return
-        # Update pořadí v DB
         with get_connection() as con:
             cur = con.cursor()
             for pos, filename in enumerate(new_order, 1):
@@ -418,7 +408,6 @@ class PlaylistWindow(QWidget):
                     (pos, self.current_playlist_id, filename)
                 )
             con.commit()
-        print("Playlist pořadí aktualizováno:", new_order)
 
     def highlight_current_film(self, filepath):
         for i in range(self.film_list.count()):
@@ -428,8 +417,8 @@ class PlaylistWindow(QWidget):
             if path == filepath:
                 font.setBold(True)
                 item.setFont(font)
-                item.setBackground(QtGui.QColor("#22ffc6"))  # stejná jako selection
-                item.setForeground(QtGui.QColor("#181a1f"))  # Optional
+                item.setBackground(QtGui.QColor("#22ffc6"))
+                item.setForeground(QtGui.QColor("#181a1f"))
             else:
                 font.setBold(False)
                 item.setFont(font)
@@ -450,19 +439,5 @@ def cleanup_default_playlist():
             con.commit()
     except sqlite3.Error as e:
         print(f"Chyba při čištění dočasného playlistu: {e}")
-
-def add_files_to_current_playlist(self, files: list):
-    if not self.current_playlist_id:
-        with get_connection() as con:
-            cur = con.cursor()
-            cur.execute("INSERT INTO playlists (name) VALUES ('_DEFAULT_')")
-            self.current_playlist_id = cur.lastrowid
-            pos = cur.fetchone()[0] + 1
-            for i, f in enumerate(files):
-                cur.execute("INSERT INTO playlist_items (playlist_id, filename, position) VALUES (?, ?, ?)",
-                            (self.current_playlist_id, f, pos + i))
-            con.commit()
-        self.load_films()
-
 
 

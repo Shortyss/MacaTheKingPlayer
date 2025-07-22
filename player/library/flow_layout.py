@@ -1,4 +1,4 @@
-# soubor: flow_layout.py
+
 from PyQt6.QtWidgets import QLayout, QStyle
 from PyQt6.QtCore import QPoint, QRect, QSize, Qt
 

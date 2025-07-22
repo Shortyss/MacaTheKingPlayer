@@ -43,7 +43,7 @@ def clean_title_for_search(filename):
 
 class DataFetchingWorker(QObject):
     finished = pyqtSignal()
-    progress = pyqtSignal(int, int, str)  # aktuální, celkem, název filmu
+    progress = pyqtSignal(int, int, str)
     film_updated = pyqtSignal(dict)
 
     def __init__(self, api_key, films_to_update):
@@ -71,10 +71,8 @@ class DataFetchingWorker(QObject):
             if not details:
                 continue
 
-            # Stáhneme plakát a získáme LOKÁLNÍ cestu k němu
             local_poster_path = download_poster_and_get_path(details.get('poster'), film_data.get('filepath'))
 
-            # Aktualizujeme původní slovník nově staženými daty
             film_data.update({
                 'title': details.get('title'),
                 'year': details.get('year'),

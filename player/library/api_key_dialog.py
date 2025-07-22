@@ -10,7 +10,6 @@ class ApiKeyDialog(QDialog):
 
         layout = QVBoxLayout(self)
 
-        # Text s instrukcemi a klikatelným odkazem
         instructions = QLabel()
         instructions.setText(
             "Pro stahování dat je potřeba Váš osobní TMDB API klíč.\n\n"
@@ -18,7 +17,7 @@ class ApiKeyDialog(QDialog):
             "2. Po přihlášení si vygenerujte klíč v Nastavení -> API.\n"
             "3. Vložte klíč do pole níže."
         )
-        instructions.setOpenExternalLinks(True) # Umožní otevírat odkazy
+        instructions.setOpenExternalLinks(True)
         layout.addWidget(instructions)
 
         self.api_key_input = QLineEdit()
@@ -32,5 +31,4 @@ class ApiKeyDialog(QDialog):
         layout.addWidget(self.button_box)
 
     def get_api_key(self):
-        """Vrátí text zadaný uživatelem."""
         return self.api_key_input.text().strip()

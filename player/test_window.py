@@ -1,83 +1,63 @@
-import os
+# test_card.py
 import sys
-import mpv
+from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QFrame
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QPushButton, QApplication
 
-os.environ["LC_NUMERIC"] = "C"
-os.environ["QT_QPA_PLATFORM"] = "wayland"
 
-class MpvPlayer(QMainWindow):
-    def __init__(self, video_path):
-        super().__init__()
-        self.setWindowTitle("MacaTheKingPlayer")
-        self.resize(800, 600)
+# --- Zkopírovaná, ale ultra-zjednodušená třída FilmCard ---
+class FilmCard(QFrame):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setObjectName("filmCardContainer")
+        self.setFixedSize(230, 380)
 
-        self.mpv_widget = QWidget(self)
-        self.setCentralWidget(self.mpv_widget)
+        container_layout = QVBoxLayout(self)
+        container_layout.setContentsMargins(3, 3, 3, 3)
 
-        self.layout = QVBoxLayout(self.mpv_widget)
-        self.play_pause_button = QPushButton("Play/Pause", self)
-        self.stop_button = QPushButton("Stop", self)
-        self.layout.addWidget(self.play_pause_button)
-        self.layout.addWidget(self.stop_button)
+        self.content_widget = QWidget(self)
+        self.content_widget.setObjectName("filmCardContent")
+        self.content_widget.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
+        container_layout.addWidget(self.content_widget)
 
-        self.play_pause_button.clicked.connect(self.toggle_play_pause)
-        self.stop_button.clicked.connect(self.stop)
 
-        self.mpv = None
-        self.video_path = video_path
-        self.initialize_mpv()
+# --- OPRAVA: Spojíme styly do jednoho řetězce ---
+STYLESHEET = """
+    /* Hlavní okno bude mít tmavé pozadí */
+    #mainWindow {
+        background-color: #1a1a1a;
+    }
 
-    def initialize_mpv(self):
-        try:
-            self.mpv = mpv.MPV(
-                vo='x11',
-                hwdec='auto',
-                log_handler=print,
-                loglevel='info'
-            )
-            self.mpv.play(self.video_path)
-        except Exception as e:
-            print(f"Chyba při inicializaci MPV: {e}")
-            sys.exit(1)
+    /* Styl pro vnější kontejner karty */
+    #filmCardContainer {
+        background-color: #00fff7;
+        border-radius: 38px;
+        margin: 10px;
+    }
 
-    def toggle_play_pause(self):
-        if not self.mpv:
-            print("MPV není inicializováno.")
-            return
-        try:
-            if self.mpv.pause:
-                self.mpv.pause = False
-                self.play_pause_button.setText("Pause")
-            else:
-                self.mpv.pause = True
-                self.play_pause_button.setText("Play")
-        except mpv.ShutdownError:
-            print("MPV core byl ukončen.")
-            self.mpv = None
+    /* Styl pro vnitřní obsah karty */
+    #filmCardContent {
+        background-color: #2d3950;
+        border-radius: 35px;
+    }
+"""
 
-    def stop(self):
-        if not self.mpv:
-            print("MPV není inicializováno.")
-            return
-        try:
-            self.mpv.command('stop')
-            self.play_pause_button.setText("Play")
-        except mpv.ShutdownError:
-            print("MPV core byl ukončen.")
-            self.mpv = None
-
-    def closeEvent(self, event):
-        if self.mpv:
-            try:
-                self.mpv.terminate()
-            except mpv.ShutdownError:
-                pass
-        event.accept()
-
-if __name__ == "__main__":
+# --- Kód pro spuštění testovacího okna ---
+if __name__ == '__main__':
     app = QApplication(sys.argv)
-    player = MpvPlayer('/run/media/maca/Filmy a Serialy/Komedie/Taxi 2.mp4')
-    player.show()
+
+    main_window = QWidget()
+    main_window.setObjectName("mainWindow")  # Dáme oknu jméno pro stylování
+    main_window.setWindowTitle("Test Zakulacených Rohů")
+
+    test_card = FilmCard()
+
+    layout = QVBoxLayout(main_window)
+    layout.addWidget(test_card, alignment=Qt.AlignmentFlag.AlignCenter)
+
+    # Aplikujeme JEDEN kompletní stylopis
+    main_window.setStyleSheet(STYLESHEET)
+
+    main_window.resize(400, 500)
+    main_window.show()
+
     sys.exit(app.exec())

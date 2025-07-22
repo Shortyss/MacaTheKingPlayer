@@ -1,5 +1,6 @@
-# tmdb_api.py
+
 import locale
+import subprocess
 
 import requests
 from tmdbv3api import TMDb, Movie, Search
@@ -14,11 +15,10 @@ class TMDB_API:
         self.tmdb = TMDb()
         self.tmdb.api_key = api_key
 
-        # --- ZJIŠTĚNÍ JAZYKA OS ---
+        # ZJIŠTĚNÍ JAZYKA OS
         try:
-            # Zjistíme jazyk systému, např. ('cs_CZ', 'UTF-8')
             lang_code, _ = locale.getdefaultlocale()
-            # Převedeme ho na formát, kterému rozumí TMDB (např. 'cs-CZ')
+            # Převod na formát
             self.os_language = lang_code.replace('_', '-')
             print(f"DEBUG: Jazyk systému detekován jako: {self.os_language}")
         except Exception:
@@ -26,7 +26,7 @@ class TMDB_API:
             self.os_language = 'en-US'
             print(f"DEBUG: Nepodařilo se detekovat jazyk, používám výchozí: {self.os_language}")
 
-        self.tmdb.language = self.os_language  # Nastavíme primární jazyk
+        self.tmdb.language = self.os_language
         self.tmdb.debug = False
 
         self.poster_base_url = "https://image.tmdb.org/t/p/w500"
@@ -34,18 +34,12 @@ class TMDB_API:
         self.search_api = Search()
 
     def search_movie(self, title):
-        # ... tato metoda zůstává beze změny ...
         search_response = self.search_api.movies(title)
         if search_response and search_response.results:
             return search_response.results[0]
         return None
 
     def get_movie_details(self, movie_id):
-        """
-        Získá detaily filmu. Primárně v jazyce OS, ale pro videa
-        se v případě neúspěchu zeptá i na anglické verze.
-        """
-        # 1. Získáme hlavní detaily v jazyce OS
         self.tmdb.language = self.os_language
         details = self.movie_api.details(movie_id, append_to_response='videos')
         if not details:
@@ -55,26 +49,22 @@ class TMDB_API:
         if hasattr(details, 'videos') and details.videos['results']:
             videos_results = details.videos['results']
 
-        # 2. POKUD jsme nenašli videa v jazyce OS a jazyk OS NENÍ angličtina...
         if not videos_results and 'en' not in self.os_language:
-            # ...provedeme záložní volání pro anglická videa.
             self.tmdb.language = 'en-US'
             videos_en_response = self.movie_api.videos(movie_id)
-            self.tmdb.language = self.os_language  # Vrátíme jazyk zpět
+            self.tmdb.language = self.os_language
 
             if hasattr(videos_en_response, 'results') and videos_en_response.results:
                 videos_results = videos_en_response.results
 
-        # 3. Zpracujeme nejlepší nalezená videa
         trailer_url = None
         if videos_results:
             videos_sorted = sorted(videos_results, key=lambda v: v.get('type') == 'Trailer', reverse=True)
             for video in videos_sorted:
                 if video.get('site') == 'YouTube':
-                    trailer_url = f"https://www.youtube.com/watch?v=KEY{video.get('key')}"
+                    trailer_url = f"https://www.youtube.com/watch?v={video.get('key')}"
                     break
 
-        # 4. Sestavíme finální data
         countries = [c['name'] for c in details.production_countries] if hasattr(details,
                                                                                  'production_countries') else []
         genres = [g['name'] for g in details.genres] if hasattr(details, 'genres') else []
@@ -104,14 +94,34 @@ def download_poster_and_get_path(poster_url, film_filepath):
         local_filename = f"{base_name}.jpg"
         local_path = os.path.join("assets", "posters", local_filename)
 
-        # Uložíme obrázek na disk
         with open(local_path, 'wb') as f:
             for chunk in response.iter_content(chunk_size=8192):
                 f.write(chunk)
-
-        print(f"Plakát stažen a uložen do: {local_path}")
         return local_path
 
     except requests.exceptions.RequestException as e:
-        print(f"Chyba při stahování plakátu: {e}")
+        return None
+
+
+def get_stream_url(youtube_url):
+    if not youtube_url:
+        return None
+    try:
+        command = ["yt-dlp", "--get-url", youtube_url]
+
+        result = subprocess.run(
+            command,
+            capture_output=True,
+            text=True,
+            check=True
+        )
+
+        stream_url = result.stdout.strip().splitlines()[0]
+        return stream_url
+
+    except FileNotFoundError:
+        return None
+    except subprocess.CalledProcessError as e:
+        return None
+    except Exception as e:
         return None

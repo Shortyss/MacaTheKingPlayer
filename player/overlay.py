@@ -4,7 +4,6 @@ from PyQt6.QtCore import pyqtSignal, Qt, QSize
 from PyQt6.QtMultimedia import QMediaPlayer
 
 class ClickableSlider(QSlider):
-    """Slider that reacts to click-to-seek."""
     def __init__(self, orientation, parent=None):
         super().__init__(orientation, parent)
 
@@ -43,7 +42,7 @@ class ControlOverlay(QWidget):
         self.bg_panel = QFrame(self)
         self.bg_panel.setObjectName("OverlayPanel")
 
-        # ---- Ovládací prvky ----
+        # Ovládací prvky
         self.play_icon = QIcon("assets/icons/play.svg")
         self.pause_icon = QIcon("assets/icons/pause.svg")
         self.stop_icon = QIcon("assets/icons/stop.svg")
@@ -60,7 +59,7 @@ class ControlOverlay(QWidget):
         self.mute_icon = QIcon("assets/icons/mute.svg")
         self.unmute_icon = QIcon("assets/icons/unmute.svg")
 
-        # --- Ovládací tlačítka ---
+        # Ovládací tlačítka
         self.prev_button = QPushButton(self.bg_panel)
         self.prev_button.setIcon(self.prev_icon)
         self.prev_button.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -137,7 +136,7 @@ class ControlOverlay(QWidget):
         self.effects_button.setIcon(self.effects_icon)
         self.effects_button.setCursor(Qt.CursorShape.PointingHandCursor)
         self.effects_button.setToolTip("Hlasitost efektů")
-        self.effects_button.hide()  # Skrytý dokud nemáš separátní stopy
+        self.effects_button.hide()
 
         # Volume slider:
         self.volume_slider = QSlider(Qt.Orientation.Horizontal, self.bg_panel)
@@ -187,7 +186,7 @@ class ControlOverlay(QWidget):
         main_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.addWidget(self.bg_panel)
 
-        # --- Signály (konektory) ---
+        # Signály
         self.prev_button.clicked.connect(lambda: self.prev_pressed.emit())
         self.next_button.clicked.connect(lambda: self.next_pressed.emit())
         self.back10_button.clicked.connect(lambda: self.back10_pressed.emit())
@@ -203,7 +202,6 @@ class ControlOverlay(QWidget):
         self.mute_button.clicked.connect(self.mute_toggled)
         self.effects_button.clicked.connect(lambda: self.effects_volume_pressed.emit())
 
-        # Stylujeme JEN panel (OverlayPanel)
         self.bg_panel.setStyleSheet("""
             #OverlayPanel {
                 background: qlineargradient(
@@ -228,8 +226,7 @@ class ControlOverlay(QWidget):
                 font-size: 11px;
                 background: transparent;
             }
-        
-            /* Multimediální tlačítka – oválné, menší šířka */
+
             QPushButton[class="media"], QPushButton[class="home"], QPushButton[class="donate"] {
                 background: qradialgradient(
                     cx:0.5, cy:0.55, radius:0.82, fx:0.5, fy:0.5,
@@ -244,8 +241,7 @@ class ControlOverlay(QWidget):
                     stop:0 #41ffe7, stop:0.7 #162c2c, stop:1 transparent);
                 border: 1.5px solid #22ffc6;
             }
-            
-            /* Kulatá tlačítka */
+
             QPushButton[class="circle"] {
                 background: qradialgradient(
                     cx:0.5, cy:0.55, radius:0.82, fx:0.5, fy:0.5,
@@ -259,19 +255,16 @@ class ControlOverlay(QWidget):
                 color: #f2fff8;
             }
 
-            /* Home & Donate – stejné pozadí, max 10% světlejší, kulaté! */
             QPushButton[class="home"], QPushButton[class="donate"] {
                 min-width: 44px; min-height: 44px;
                 max-width: 44px; max-height: 44px;
                 border-radius: 22px;
-                /* Můžeš lehce zvýšit světlost, třeba: stop:0 #3b4f6d (o 10% světlejší) */
             }
             
             QPushButton > * {
                 color: #eafff7;
             }
-            
-            /* Tenčí border */
+
             QPushButton {
                 border-width: 1.1px;
             }

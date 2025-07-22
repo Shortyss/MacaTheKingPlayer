@@ -5,6 +5,7 @@ from glob import glob
 
 from PyQt6.QtCore import Qt, QThread, QTimer, QPropertyAnimation, QRect, \
     QEasingCurve, QPoint, QVariantAnimation, QSettings
+
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton,
     QGridLayout, QScrollArea, QFileDialog, QListWidget, QApplication, QFrame,
@@ -49,7 +50,7 @@ class LibraryWindow(QWidget):
 
         self.hover_enter_timer = QTimer(self)
         self.hover_enter_timer.setSingleShot(True)
-        self.hover_enter_timer.setInterval(250)  # Zpoždění 250ms
+        self.hover_enter_timer.setInterval(250)
         self.hover_enter_timer.timeout.connect(self._animate_card_in)
 
         self.filter_debounce_timer = QTimer(self)
@@ -62,26 +63,26 @@ class LibraryWindow(QWidget):
         self.setup_connections()
         self.load_films_from_db()
         self.load_library_paths_from_db()
+
         self.move_to_center_of_parent()
 
         QApplication.restoreOverrideCursor()
         self.setMouseTracking(True)
 
     def setup_ui(self):
-        # --- Základní layout okna (zůstává stejný) ---
         main_layout = QHBoxLayout(self)
         main_layout.setContentsMargins(12, 12, 12, 12)
         main_layout.setSpacing(8)
         self.setStyleSheet(get_main_stylesheet())
 
-        # --- Hlavní panel s filtry (zcela nová struktura) ---
+        # Hlavní panel s filtry
         self.filter_panel = QWidget()
         self.filter_panel.setObjectName("filterPanel")
         filter_layout = QVBoxLayout(self.filter_panel)
         filter_layout.setContentsMargins(10, 15, 10, 15)
-        filter_layout.setSpacing(20)  # Větší mezery mezi hlavními bloky
+        filter_layout.setSpacing(20)
 
-        # --- Blok 1: Rychlé filtry ---
+        # Blok 1: Rychlé filtry
         filter_layout.addWidget(QLabel("Základní filtry"))
         fast_filters_group = QFrame(self)
         fast_filters_group.setObjectName("groupBox")
@@ -97,7 +98,7 @@ class LibraryWindow(QWidget):
 
         filter_layout.addWidget(fast_filters_group)
 
-        # --- Blok 2: Pokročilé filtry ---
+        # Blok 2: Pokročilé filtry
         filter_layout.addWidget(QLabel("Pokročilé filtry"))
         adv_filters_group = QFrame(self)
         adv_filters_group.setObjectName("groupBox")
@@ -114,29 +115,40 @@ class LibraryWindow(QWidget):
         year_layout.addWidget(self.year_filter_to)
         adv_filters_layout.addLayout(year_layout)
 
-        # Ostatní filtry (zatím jako původní QLineEdit)
-        self.length_filter = QLineEdit()
-        self.length_filter.setPlaceholderText("Délka (min)...")
-        adv_filters_layout.addWidget(self.length_filter)
+        # Ostatní filtry
+        adv_filters_layout.addWidget(QLabel("Délka:"))
+        self.length_layout = FlowLayout(spacing=8)
+        self.length_buttons = []
+        self.length_options = {
+            "Do 90 min": (0, 90),
+            "90-120 min": (90, 120),
+            "Nad 120 min": (120, 9999)
+        }
+        for text in self.length_options.keys():
+            button = TagButton(text)
+            self.length_layout.addWidget(button)
+            self.length_buttons.append(button)
+        adv_filters_layout.addLayout(self.length_layout)
 
-        self.country_filter = QLineEdit()
-        self.country_filter.setPlaceholderText("Země původu...")
-        adv_filters_layout.addWidget(self.country_filter)
+        adv_filters_layout.addWidget(QLabel("Země původu:"))
+        self.country_layout = FlowLayout(spacing=8)
+        self.country_buttons = []
+        adv_filters_layout.addLayout(self.country_layout)
 
         adv_filters_layout.addWidget(QLabel("Žánry:"))
-        self.genre_layout = FlowLayout(spacing=8)  # Použijeme náš nový layout
-        self.genre_buttons = {}  # Slovník pro snadný přístup k tlačítkům
+        self.genre_layout = FlowLayout(spacing=8)
+        self.genre_buttons = {}
 
         for genre in ALL_GENRES:
             button = TagButton(genre)
-            button.stateChanged.connect(self.apply_filters)  # Napojíme na filtr
+            button.stateChanged.connect(self.apply_filters)
             self.genre_layout.addWidget(button)
             self.genre_buttons[genre] = button
 
         adv_filters_layout.addLayout(self.genre_layout)
         filter_layout.addWidget(adv_filters_group)
 
-        # --- Blok 3: Správa Knihovny ---
+        # Blok 3: Správa Knihovny
         filter_layout.addWidget(QLabel("Správa knihovny"))
         library_group = QFrame(self)
         library_group.setObjectName("groupBox")
@@ -157,11 +169,11 @@ class LibraryWindow(QWidget):
 
         filter_layout.addWidget(library_group)
 
-        # --- Blok 4: Akce a Nastavení ---
+        # Blok 4: Akce a Nastavení
         filter_layout.addWidget(QLabel("Akce s filmy"))
         actions_group = QFrame(self)
         actions_group.setObjectName("groupBox")
-        actions_layout = QGridLayout(actions_group)  # GridLayout pro úhledné rozmístění 2x2
+        actions_layout = QGridLayout(actions_group)
 
         self.btn_select_mode = QPushButton("Označit filmy")
         self.btn_add_files = QPushButton("Přidat soubory")
@@ -175,11 +187,11 @@ class LibraryWindow(QWidget):
 
         filter_layout.addWidget(actions_group)
 
-        # --- Ukončení ---
-        filter_layout.addStretch(1)  # Odsune zbytek úplně dolů
+        # Ukončení
+        filter_layout.addStretch(1)
 
         self.status_label = QLabel("Připraven")
-        self.status_label.setObjectName("statusLabel")  # Pro případné stylování
+        self.status_label.setObjectName("statusLabel")
         filter_layout.addWidget(self.status_label)
 
         bottom_buttons_layout = QHBoxLayout()
@@ -190,7 +202,7 @@ class LibraryWindow(QWidget):
 
         filter_layout.addLayout(bottom_buttons_layout)
 
-        # --- Mřížka s filmy (zůstává stejná) ---
+        # Mřížka s filmy
         grid_panel = QWidget()
         self.grid_layout = QGridLayout(grid_panel)
         self.grid_layout.setSpacing(12)
@@ -199,8 +211,8 @@ class LibraryWindow(QWidget):
         scroll.setWidget(grid_panel)
         scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
 
-        # --- Finální sestavení okna ---
-        main_layout.addWidget(scroll, stretch=5)  # Dal jsem filmům trochu víc místa
+        # Finální sestavení okna
+        main_layout.addWidget(scroll, stretch=5)
         main_layout.addWidget(self.filter_panel, stretch=2)
 
     def setup_connections(self):
@@ -217,12 +229,13 @@ class LibraryWindow(QWidget):
         self.btn_import.clicked.connect(self.on_import_button_clicked)
         self.year_filter_from.textChanged.connect(self.apply_filters)
         self.year_filter_to.textChanged.connect(self.apply_filters)
+        for button in self.length_buttons:
+            button.stateChanged.connect(self.apply_filters)
         self.filter_debounce_timer.timeout.connect(self._execute_filters)
 
     def on_import_button_clicked(self):
         settings = QSettings("KingPlayer", "Library")
         api_key = settings.value("tmdb_api_key", "")
-        # ... kód pro získání API klíče zůstává stejný ...
         if not api_key:
             dialog = ApiKeyDialog(self)
             if dialog.exec():
@@ -234,7 +247,7 @@ class LibraryWindow(QWidget):
             else:
                 return
 
-        films_to_update = [f for f in self.all_films if not f.get('trailer_url')]
+        films_to_update = self.films[:]
         if not films_to_update:
             self.status_label.setText("Všechny filmy jsou aktuální.")
             return
@@ -271,6 +284,7 @@ class LibraryWindow(QWidget):
 
     def load_films_from_db(self):
         self.all_films = self.db.get_all_films()
+        self._update_country_filter_buttons()
         self.apply_filters()
 
     def load_library_paths_from_db(self):
@@ -279,7 +293,6 @@ class LibraryWindow(QWidget):
         self.library_paths_list.addItems(paths)
 
     def _execute_filters(self):
-        # --- 1. Získáme hodnoty VŠECH filtrů JEN JEDNOU ---
         title_text = self.title_filter.text().lower()
         min_rating = self.rating_filter._rating
         try:
@@ -291,13 +304,17 @@ class LibraryWindow(QWidget):
         except ValueError:
             year_to = datetime.date.today().year + 1
 
+
+        selected_lengths = [self.length_options[btn.text()] for btn in self.length_buttons if btn.isChecked()]
+
+        selected_countries = {btn.text() for btn in self.country_buttons if btn.isChecked()}
+
         # Zjistíme aktivní žánry PŘED cyklem
         selected_genres = {genre for genre, button in self.genre_buttons.items() if button.isActive()}
 
-        # --- 2. Filtrujeme filmy ---
+        # Filtrujeme filmy
         filtered_films = []
         for film_data in self.all_films:
-            # Podmínky pro title a rating
             title_ok = not title_text or title_text in film_data.get('title', '').lower()
             rating_ok = float(film_data.get('rating', 0)) >= min_rating
 
@@ -306,19 +323,32 @@ class LibraryWindow(QWidget):
             film_year = int(film_year_str) if film_year_str.isdigit() else 0
             year_ok = year_from <= film_year <= year_to
 
-            # ZDE JE OPRAVENÁ A DOPLNĚNÁ LOGIKA PRO ŽÁNRY
+            # Podmínka pro délku
+            length_ok = True
+            if selected_lengths:
+                film_runtime = film_data.get('runtime') or 0
+                length_ok = any(min_len < film_runtime <= max_len for min_len, max_len in selected_lengths)
+
+            # Podmínka pro zemi
+            country_ok = True
+            if selected_countries:
+                film_countries_str = film_data.get('country') or ''
+                film_countries = {c.strip() for c in film_countries_str.split(',')}
+                if film_countries.isdisjoint(selected_countries):
+                    country_ok = False
+
+            # ŽÁNRY
             genre_ok = True
-            if selected_genres:  # Tuto kontrolu děláme, jen pokud je nějaký žánr vybrán
+            if selected_genres:
                 film_genres_str = film_data.get('genres') or ''
                 film_genres = set(g.strip() for g in film_genres_str.split(','))
                 if film_genres.isdisjoint(selected_genres):
                     genre_ok = False
 
-            # Pokud vše platí, film přidáme
-            if title_ok and rating_ok and year_ok and genre_ok:
+            if title_ok and rating_ok and year_ok and genre_ok and length_ok and country_ok:
                 filtered_films.append(film_data)
 
-        # --- 3. Aktualizujeme UI (logika s recyklací widgetů) ---
+        # Aktualizujeme UI
         filtered_films.sort(key=lambda film: film.get('title', '').lower())
         self.films = filtered_films
         num_needed = len(self.films)
@@ -333,7 +363,7 @@ class LibraryWindow(QWidget):
 
             else:
                 row, col = divmod(i, 5)
-                card = FilmCard(film_data)
+                card = FilmCard(film_data, parent=self, player_window=self.player_window)
                 card.select_mode = self.select_mode
                 card.hover_triggered.connect(self.on_card_hover_event)
                 self.grid_layout.addWidget(card, row, col)
@@ -370,7 +400,6 @@ class LibraryWindow(QWidget):
         QApplication.processEvents()
 
         try:
-            # --- Jádro původní logiky ---
             all_files = []
             paths = [self.library_paths_list.item(i).text() for i in range(self.library_paths_list.count())]
 
@@ -418,7 +447,7 @@ class LibraryWindow(QWidget):
         self.btn_remove.setEnabled(True)
         self.btn_remove.setText("Odebrat vybrané")
 
-        # Aktualizuj data v paměti a překresli UI
+        # Aktualizuje data v paměti a překresli UI
         filepaths_set = set(deleted_filepaths)
         self.all_films = [film for film in self.all_films if film['filepath'] not in filepaths_set]
 
@@ -444,7 +473,7 @@ class LibraryWindow(QWidget):
     def toggle_select_mode(self):
         self.select_mode = not self.select_mode
         for card in self.card_widgets:
-            if card.isVisible():  # Ovlivníme jen viditelné karty
+            if card.isVisible():
                 card.select_mode = self.select_mode
                 card.checkbox.setVisible(self.select_mode)
 
@@ -459,26 +488,29 @@ class LibraryWindow(QWidget):
         else:
             self.close()
 
-    # V TŘÍDĚ LibraryWindow - PŘEPIŠ CELOU SADU ANIMAČNÍCH METOD
+    def _handle_play_film_request(self, film_data):
+        if self.animation_container:
+            self._cleanup_animation()
+        if self.player_window:
+            playlist, idx = self.player_window.add_file_to_default_playlist(film_data["filepath"])
+            self.player_window.play_from_playlist(film_data["filepath"], playlist, idx)
+            self.player_window.show()
+            self.player_window.showFullScreen()
+        self.back_to_player()
+
 
     def on_card_hover_event(self, entered, card):
-        """Reaguje na signál z karty."""
         if entered:
-            # Pokud je nějaká karta otevřená a najedeme na jinou
             if self.animation_container and self.original_card and self.original_card != card:
-                # Dáme novou kartu do "fronty" a spustíme zavírání té staré.
                 self.queued_card = card
                 self._animate_card_out()
-            # Pokud nic není otevřené, spustíme časovač pro otevření.
             elif not self.animation_container:
                 self.active_hover_card = card
                 self.hover_enter_timer.start()
         else:
-            # Při opuštění malé karty zastavíme časovač
             self.hover_enter_timer.stop()
 
     def _animate_card_in(self):
-        """Spustí animaci interaktivního widgetu."""
         if self.animation_container or not self.active_hover_card:
             return
 
@@ -499,17 +531,22 @@ class LibraryWindow(QWidget):
 
         self.animated_card, interactive_widgets = self.original_card._create_back_widget()
 
-        # Napojíme signály tlačítek
+        self.original_card.play_film_requested.connect(self._handle_play_film_request)
+        rating_widget = interactive_widgets.get("rating_widget")
+        if rating_widget:
+            rating_widget.ratingChanged.connect(
+                lambda rating: self._handle_rating_changed(self.original_card.film_data, rating)
+            )
+
+        # signály tlačítek
         interactive_widgets["delete_button"].clicked.connect(
             lambda: self._handle_delete_film(self.original_card.film_data))
         interactive_widgets["edit_button"].clicked.connect(lambda: self._handle_edit_film(self.original_card.film_data))
 
-        # ZDE JE ZMĚNA: Napojíme signál pro změnu hodnocení
         interactive_widgets["rating_widget"].ratingChanged.connect(
             lambda rating: self._handle_rating_changed(self.original_card.film_data, rating)
         )
 
-        # self.animated_card = self.original_card._create_back_widget()
         container_layout = QVBoxLayout(self.animation_container)
         container_layout.setContentsMargins(15, 15, 15, 15)
         container_layout.addWidget(self.animated_card)
@@ -541,26 +578,21 @@ class LibraryWindow(QWidget):
         self.scale_animation.start()
 
     def _update_animation_frame(self, scale):
-        """Tato funkce se volá pro každý snímek animace, nyní je chytřejší."""
         if not self.animation_container: return
 
-        # Výpočet geometrie zůstává stejný
+        # Výpočet geometrie
         w = self.start_geometry.width() * scale
         h = self.start_geometry.height() * scale
         x = self.start_geometry.x() - (w - self.start_geometry.width()) / 2
         y = self.start_geometry.y() - (h - self.start_geometry.height()) / 2
         self.animation_container.setGeometry(int(x), int(y), int(w), int(h))
 
-        # --- OPRAVENÁ LOGIKA PRO PÍSMO ---
         for widget, original_font in self.original_fonts.items():
-            if not widget: continue  # Pojistka, kdyby widget mezitím zmizel
-
+            if not widget: continue
             scaled_font = QFont(original_font)
 
-            # Zjistíme, jestli font používá body nebo pixely
             if original_font.pointSizeF() > 0:
                 new_size = original_font.pointSizeF() * scale
-                # Pojistka proti záporným hodnotám
                 if new_size > 0.1:
                     scaled_font.setPointSizeF(new_size)
             elif original_font.pixelSize() > 0:
@@ -571,11 +603,9 @@ class LibraryWindow(QWidget):
             widget.setFont(scaled_font)
 
     def _animate_card_out(self):
-        """Spustí animaci pro návrat na původní místo."""
         if not self.animation_container or not self.scale_animation:
             return
 
-        # Odpojíme signály, aby se nic nespustilo dvakrát
         try:
             self.animation_container.mouse_left.disconnect()
         except TypeError:
@@ -585,25 +615,26 @@ class LibraryWindow(QWidget):
         except TypeError:
             pass
 
-        # Po dokončení animace "ven" se VŽDY spustí úklid
         self.scale_animation.finished.connect(self._cleanup_animation)
 
         self.scale_animation.setDirection(QPropertyAnimation.Direction.Backward)
         self.scale_animation.start()
 
     def _cleanup_animation(self):
-        """Uklidí a případně spustí další animaci z fronty."""
-        # Zastavíme běžící animaci
         if self.scale_animation and self.scale_animation.state() == QPropertyAnimation.State.Running:
             self.scale_animation.stop()
 
-        # Uklidíme staré prvky
         if self.animation_container:
             self.animation_container.hide()
             self.animation_container.deleteLater()
             self.animation_container = None
 
         if self.original_card:
+            try:
+                self.original_card.play_film_requested.disconnect(self._handle_play_film_request)
+            except TypeError:
+                pass
+
             self.original_card.front_widget.show()
             self.original_card.setOpacity(1.0)
 
@@ -619,18 +650,13 @@ class LibraryWindow(QWidget):
             except TypeError:
                 pass
 
-        # ZDE JE TA MAGIE: Zkontrolujeme frontu
         if self.queued_card:
-            # Pokud karta čeká, spustíme pro ni otevírací animaci
             card_to_open = self.queued_card
-            self.queued_card = None  # Vyčistíme frontu
+            self.queued_card = None
             self.active_hover_card = card_to_open
             self.hover_enter_timer.start()
 
     def _handle_delete_film(self, film_data):
-        """
-        Zobrazí potvrzovací dialog a po potvrzení smaže film.
-        """
         filepath = film_data.get('filepath')
         title = film_data.get('title', 'Tento soubor')
         if not filepath:
@@ -645,26 +671,18 @@ class LibraryWindow(QWidget):
         msg_box.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
         msg_box.setDefaultButton(QMessageBox.StandardButton.No)
 
-        # Zobrazíme dialog a počkáme na odpověď
         reply = msg_box.exec()
 
-        # Pokud uživatel kliknul na "Yes", provedeme smazání
         if reply == QMessageBox.StandardButton.Yes:
-            print(f"Uživatel potvrdil smazání filmu: {filepath}")
-
-            # Jádro naší mazací logiky
             self.db.delete_film(filepath)
             self.all_films = [film for film in self.all_films if film['filepath'] != filepath]
 
-            # Zavřeme animovanou kartu a překreslíme knihovnu
             self._animate_card_out()
             self.apply_filters()
         else:
-            print("Uživatel zrušil mazání.")
+            pass
 
     def on_film_data_updated(self, old_data, new_data):
-        print("Přijata nová data, aktualizuji databázi a UI.")
-
         self.db.delete_film(old_data['filepath'])
         self.db.add_or_update_film(new_data)
 
@@ -683,20 +701,14 @@ class LibraryWindow(QWidget):
         self._animate_card_out()
 
     def _handle_rating_changed(self, film_data, new_rating):
-        print(f"Měním hodnocení pro '{film_data['title']}' na {new_rating}")
-
-        # 1. Aktualizujeme data v paměti
         film_data['rating'] = new_rating
 
-        # 2. Uložíme celý záznam do databáze
         self.db.add_or_update_film(film_data)
 
-        # 3. Okamžitě aktualizujeme hvězdičky i na původní (malé) kartě
         if self.original_card and self.original_card.film_data['filepath'] == film_data['filepath']:
             self.original_card.rating_widget.setRating(new_rating)
 
     def on_single_film_updated(self, updated_film_data):
-        """Aktualizuje jeden film v DB a v paměti."""
         self.db.add_or_update_film(updated_film_data)
         for i, film in enumerate(self.all_films):
             if film['filepath'] == updated_film_data['filepath']:
@@ -708,99 +720,60 @@ class LibraryWindow(QWidget):
                 break
 
     def update_fetch_progress(self, current, total, title):
-        """Aktualizuje stavový popisek."""
         self.status_label.setText(f"Stahuji ({current}/{total}): {title}...")
 
     def on_fetching_finished(self):
-        """Uklidí po dokončení stahování."""
         QApplication.restoreOverrideCursor()
         self.btn_import.setEnabled(True)
         self.status_label.setText("Stahování dokončeno.")
-        self.apply_filters()  # Překreslíme zobrazení s novými daty
+        self.apply_filters()
         self.thread.quit()
         self.thread.wait()
         self.thread = None
         self.worker = None
 
-    # def get_stylesheet(self):
-    #     return """
-    #         QWidget { background: rgba(34, 43, 66, 230); color: #eafff7; font-family: Segoe UI, Arial; font-size: 15px; }
-    #         QScrollArea { border: none; background: transparent; }
-    #         QLabel { background: transparent; }
-    #         QCheckBox {
-    #             background-color: transparent;
-    #             border: none;
-    #         }
-    #         QCheckBox:focus {
-    #             outline: none;
-    #         }
-    #         QCheckBox::indicator {
-    #             width: 22px;   /* Větší box */
-    #             height: 22px;
-    #             border-radius: 11px; /* Lehce zakulatíme rohy */
-    #         }
-    #         QCheckBox::indicator:unchecked {
-    #             background-color: #FF0000;
-    #         }
-    #         QCheckBox::indicator:checked {
-    #             background-color: #1cf512; /* Pozadí se vyplní tyrkysovou */
-    #             image: url(assets/icons/checkmark.svg); /* Ikonka fajfky (pokud ji máš) */
-    #         }
-    #         QCheckBox::indicator:hover {
-    #             border: 2px solid #00fff7; /* Při najetí myší okraj ještě více zesvětlí */
-    #         }
-    #         #filterPanel {
-    #             background-color: #232941; /* Lehce odlišené pozadí panelu */
-    #         }
-    #
-    #         /* Hlavní styl pro seskupovací boxy */
-    #         #groupBox {
-    #             background-color: rgba(0, 0, 0, 0.15);
-    #             border: 1px solid #3a4a63;
-    #             border-radius: 10px;
-    #             padding: 8px;
-    #         }
-    #
-    #         /* Hlavní nadpisy pro jednotlivé sekce */
-    #         #filterPanel > QLabel {
-    #             font-size: 16px;
-    #             font-weight: bold;
-    #             color: #00fff7; /* Zářivá tyrkysová */
-    #             margin-top: 5px;
-    #             margin-bottom: 2px; /* Přisune box blíže k nadpisu */
-    #             padding-left: 5px;
-    #         }
-    #
-    #         /* Menší nadpisy uvnitř boxů */
-    #         #groupBox > QLabel {
-    #             font-weight: normal;
-    #             color: #eafff7;
-    #             font-size: 14px;
-    #         }
-    #
-    #         TagButton {
-    #             background-color: #2d3950;
-    #             border: 1px solid #3a4a63;
-    #             border-radius: 13px; /* Kulaté rohy */
-    #             padding: 5px 12px;
-    #             font-size: 13px;
-    #             color: #a9b8d4;
-    #         }
-    #         TagButton:hover {
-    #             border-color: #16e0ec;
-    #         }
-    #         TagButton[active="true"] { /* Styl pro aktivní štítek */
-    #             background-color: #16e0ec;
-    #             border-color: #00fff7;
-    #             color: #000;
-    #             font-weight: bold;
-    #         }
-    #         QLineEdit { background: #232941; border-radius: 8px; border: 1.5px solid #181a1f; padding: 5px; }
-    #         QPushButton { background: qradialgradient(cx:0.5, cy:0.5, radius:0.8, stop:0 #283950, stop:1 #2d3950);
-    #                       border-radius: 14px; border: 1.2px solid #20ffe988; color: #eafff7; font-weight: bold; min-height: 30px; padding: 4px; }
-    #         QPushButton:hover { background: qradialgradient(cx:0.5, cy:0.5, radius:0.7, stop:0 #41ffe7, stop:1 #162c2c);
-    #                            border: 1.8px solid #22ffc6; color: #000000; }
-    #         #filmCardContainer { background-color: transparent; border-radius: 38px; border: 3px solid #00fff7; margin: 10px; }
-    #         #filmCardContent { background-color: #2d3950; border-radius: 35px; }
-    #         #titleLabel { color: #fff; font-size: 18px; font-weight: 600; }
-    #     """
+    def _update_animation_frame(self, scale):
+        if not self.animation_container: return
+
+        w = self.start_geometry.width() * scale
+        h = self.start_geometry.height() * scale
+        x = self.start_geometry.x() - (w - self.start_geometry.width()) / 2
+        y = self.start_geometry.y() - (h - self.start_geometry.height()) / 2
+        self.animation_container.setGeometry(int(x), int(y), int(w), int(h))
+
+        for widget, original_font in self.original_fonts.items():
+            try:
+                if not widget: continue
+
+                scaled_font = QFont(original_font)
+                if original_font.pointSizeF() > 0:
+                    new_size = original_font.pointSizeF() * scale
+                    if new_size > 0.1: scaled_font.setPointSizeF(new_size)
+                elif original_font.pixelSize() > 0:
+                    new_size = original_font.pixelSize() * scale
+                    if new_size > 1: scaled_font.setPixelSize(int(new_size))
+
+                widget.setFont(scaled_font)
+
+            except RuntimeError:
+                continue
+
+    def _update_country_filter_buttons(self):
+        for button in self.country_buttons:
+            self.country_layout.removeWidget(button)
+            button.deleteLater()
+        self.country_buttons.clear()
+
+        all_countries = set()
+        for film in self.all_films:
+            countries_str = film.get('country') or ''
+            for country in countries_str.split(','):
+                cleaned_country = country.strip()
+                if cleaned_country:
+                    all_countries.add(cleaned_country)
+
+        for country in sorted(list(all_countries)):
+            button = TagButton(country)
+            button.stateChanged.connect(self.apply_filters)
+            self.country_layout.addWidget(button)
+            self.country_buttons.append(button)

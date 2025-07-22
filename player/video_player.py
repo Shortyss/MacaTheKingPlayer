@@ -79,7 +79,7 @@ class PlayerWindow(QWidget):
         self.playlist_window = None
         self.current_playlist = []
         self.current_index = -1
-        # -- signály --
+        # signály
 
         self.player.durationChanged.connect(self.bottom.set_duration)
         self.player.positionChanged.connect(self.bottom.update_position)
@@ -107,7 +107,7 @@ class PlayerWindow(QWidget):
 
         self.player.mediaStatusChanged.connect(self._on_media_status_changed)
 
-        # --- přidáme info overlay ---
+        # info overlay
         self.info_overlay = InfoOverlay(self)
         self.info_overlay.hide()
 
@@ -123,7 +123,6 @@ class PlayerWindow(QWidget):
 
     def _compute_positions(self):
         W, H = self.width(), self.height()
-        # bottom
         bw, bh = W * 0.9, self.bottom.sizeHint().height()
         bx, by = (W - bw) / 2, H - bh
         self.start_b = QPointF(bx, H)
@@ -137,13 +136,13 @@ class PlayerWindow(QWidget):
             return super().eventFilter(obj, event)
 
         if obj is self.view.viewport():
-            # --- kurzor: každá aktivita myši = show + restart timeru ---
+            # aktivita myši
             if event.type() in (QEvent.Type.MouseMove, QEvent.Type.MouseButtonPress, QEvent.Type.MouseButtonRelease,
                                 QEvent.Type.Wheel):
                 self.show_mouse_cursor()
                 self.cursor_hide_timer.start()
 
-            # --- tvoje stávající logika pro ovládání overlay a fullscreen ---
+            # ovládání overlay a fullscreen
             if event.type() == QEvent.Type.MouseMove:
                 self.slide_in()
 
@@ -325,8 +324,6 @@ class PlayerWindow(QWidget):
         self.player.play()
         self.current_playlist = playlist_files
         self.current_index = index
-        print(
-            f"Přehrávám '{os.path.basename(filepath)}' (index {index}) z playlistu o {len(playlist_files)} položkách.")
         if self.playlist_window and self.playlist_window.isVisible():
             self.playlist_window.highlight_current_film(filepath)
         if self.playlist_window and self.playlist_window.isVisible():

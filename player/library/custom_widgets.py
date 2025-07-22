@@ -24,8 +24,8 @@ class TagButton(QPushButton):
 
     def on_toggled(self, checked):
         self._active = checked
-        self.setProperty("active", checked) # Pro CSS stylování
-        self.style().polish(self) # Aplikuje nový styl
+        self.setProperty("active", checked)
+        self.style().polish(self)
         self.stateChanged.emit(checked)
 
 class ClickableStar(QWidget):
@@ -33,7 +33,7 @@ class ClickableStar(QWidget):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setFixedSize(40, 40)  # Velikost hvězdy
+        self.setFixedSize(40, 40)
         self.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
         self._value = 0.0
 
@@ -119,7 +119,6 @@ class ClickableStarFilter(QWidget):
 
     def update_stars(self):
         for i, star in enumerate(self.stars):
-            # Vypočítáme hodnotu pro každou hvězdu (0, 0.5, nebo 1)
             value = max(0.0, min(1.0, self._rating - i))
             star.setValue(value)
 

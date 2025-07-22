@@ -1,42 +1,39 @@
-from PyQt6.QtCore import Qt, pyqtSignal
-from PyQt6.QtGui import QPixmap
+from PyQt6.QtCore import Qt, pyqtSignal, QUrl
+from PyQt6.QtGui import QPixmap, QIcon
+from PyQt6.QtWebEngineCore import QWebEngineSettings
+from PyQt6.QtWebEngineWidgets import QWebEngineView
 from PyQt6.QtWidgets import QHBoxLayout, QPushButton, QLabel, QVBoxLayout, QWidget, QCheckBox, QGraphicsOpacityEffect, \
-    QFrame
+    QFrame, QTextEdit
 
 from player.library.constants import PLACEHOLDER_POSTER
-from player.library.custom_widgets import ClickableStarFilter, StarRatingDisplay
+from player.library.custom_widgets import ClickableStarFilter, StarRatingDisplay, TagButton
+from player.library.flow_layout import FlowLayout
 
 
 class FilmCard(QFrame):
     hover_triggered = pyqtSignal(bool, 'QVariant')
+    play_film_requested = pyqtSignal(dict)
 
-    def __init__(self, film_data, parent=None):
+    def __init__(self, film_data, parent=None, player_window=None):
         super().__init__(parent)
         self.film_data = film_data
+        self.player_window = player_window
         self.select_mode = False
 
-        self.setObjectName("filmCardContainer")  # Toto je teď vnější widget (okraj)
+        self.setObjectName("FilmCard")
         self.setFrameShape(QFrame.Shape.NoFrame)
         self.setFixedSize(230, 380)
 
-        main_layout = QVBoxLayout(self)
-        # Okraj nastavíme pomocí marginu vnějšího layoutu
-        main_layout.setContentsMargins(3, 3, 3, 3)
-
-        # Vytvoříme vnitřní widget pro obsah
-        self.content_widget = QWidget(self)
-        self.content_widget.setObjectName("filmCardContent")
-        main_layout.addWidget(self.content_widget)
-
         self.front_widget = self._create_front_widget()
 
-        # Obsah vložíme do vnitřního widgetu
-        content_layout = QVBoxLayout(self.content_widget)
+        content_layout = QVBoxLayout(self)
         content_layout.setContentsMargins(0, 0, 0, 0)
         content_layout.addWidget(self.front_widget)
 
         self.opacity_effect = QGraphicsOpacityEffect(self)
         self.setGraphicsEffect(self.opacity_effect)
+
+        self.setOpacity(1.0)
 
     def setOpacity(self, opacity):
         self.opacity_effect.setOpacity(opacity)
@@ -51,19 +48,12 @@ class FilmCard(QFrame):
             self.hover_triggered.emit(False, self)
         super().leaveEvent(event)
 
-    def swap_widgets(self):
-        new_index = 1 - self.stacked_widget.currentIndex()
-        self.stacked_widget.setCurrentIndex(new_index)
-
-    def show_front(self):
-        self.stacked_widget.setCurrentIndex(0)
-
     def _create_front_widget(self):
         widget = QWidget()
-        widget.setObjectName("filmCardContent")
+        widget.setStyleSheet("background: transparent;")
         main_vbox = QVBoxLayout(widget)
-        main_vbox.setContentsMargins(12, 12, 12, 12)
-        main_vbox.setSpacing(10)
+        main_vbox.setContentsMargins(10, 8, 10, 9)
+        main_vbox.setSpacing(4)
 
         self.checkbox = QCheckBox()
         self.checkbox.setVisible(False)
@@ -73,8 +63,15 @@ class FilmCard(QFrame):
         self.title_label.setObjectName("titleLabel")
         self.title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.title_label.setWordWrap(True)
-        self.title_label.setFixedHeight(48)
+        self.title_label.setFixedHeight(40)
         main_vbox.addWidget(self.title_label)
+
+        self.year_label = QLabel(str(self.film_data.get("year", "")))
+        self.year_label.setObjectName("yearLabel")
+        self.year_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        main_vbox.addWidget(self.year_label)
+
+        main_vbox.addStretch(1)
 
         self.poster_label = QLabel()
         self.poster_label.setFixedSize(175, 225)
@@ -91,48 +88,129 @@ class FilmCard(QFrame):
         return widget
 
     def _create_back_widget(self):
-        """Vytvoří a vrátí widget pro zadní stranu a slovník s interaktivními prvky."""
-        widget = QWidget()
-        widget.setObjectName("filmCardContent")
-        layout = QVBoxLayout(widget)
-        layout.setContentsMargins(15, 15, 15, 15)
-        layout.setSpacing(10)
+        back_widget = QWidget()
+        main_layout = QVBoxLayout(back_widget)
+        main_layout.setContentsMargins(15, 15, 15, 15)
+        main_layout.setSpacing(8)
 
-        info_label = QLabel("Zde budou detaily filmu...")
-        info_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(info_label, 1)
+        # Název filmu
+        title = QLabel(self.film_data.get('title', '???'))
+        title.setObjectName("backSideTitle")
+        title.setWordWrap(True)
+        main_layout.addWidget(title, alignment=Qt.AlignmentFlag.AlignCenter)
 
-        # Přidáváme klikací hvězdičky
+        # Přehrávač traileru NEBO Plakát
+        trailer_url = self.film_data.get('trailer_url')
+        self.web_view = None
+
+        if trailer_url and 'youtube.com' in trailer_url:
+            video_id = trailer_url.split('v=')[-1].split('&')[0]
+
+            embed_url = f"https://www.youtube.com/embed/{video_id}?autoplay=1&mute=1&loop=1&controls=0"
+
+            self.web_view = QWebEngineView()
+            self.web_view.settings().setAttribute(QWebEngineSettings.WebAttribute.PluginsEnabled, True)
+            self.web_view.settings().setAttribute(QWebEngineSettings.WebAttribute.PlaybackRequiresUserGesture, False)
+            self.web_view.setUrl(QUrl(embed_url))
+
+            main_layout.addWidget(self.web_view, stretch=1)
+        else:
+            poster = QLabel()
+            poster.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            pixmap_path = self.film_data.get("poster") or PLACEHOLDER_POSTER
+            pix = QPixmap(pixmap_path)
+            poster.setPixmap(
+                pix.scaled(450, 500, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
+            main_layout.addWidget(poster, stretch=1)
+
+        # Hlavní ovládací tlačítka
+        controls_layout = QHBoxLayout()
+        btn_play = QPushButton("Přehrát film")
+        btn_play.clicked.connect(lambda: self.play_film_requested.emit(self.film_data))
+        controls_layout.addWidget(btn_play)
+
+        btn_mute = QPushButton()
+        if self.web_view:
+            btn_mute = QPushButton()
+            btn_mute.setObjectName("muteButton")
+            btn_mute.setIcon(QIcon("assets/icons/mute.svg"))
+            btn_mute.setCheckable(True)
+            btn_mute.setChecked(True)
+            # Funkce pro přepnutí zvuku a ikony
+            def toggle_mute(muted):
+                if self.web_view:
+                    url = self.web_view.url().toString()
+                    if muted:
+                        self.web_view.page().setAudioMuted(True)
+                    else:
+                        new_url = url.replace("mute=1", "mute=0")
+                        self.web_view.setUrl(QUrl(new_url))
+                        self.web_view.page().setAudioMuted(False)
+                    icon_path = "assets/icons/mute.svg" if muted else "assets/icons/unmute.svg"
+                    btn_mute.setIcon(QIcon(icon_path))
+
+            btn_mute.toggled.connect(toggle_mute)
+            controls_layout.addWidget(btn_mute)
+
+        main_layout.addLayout(controls_layout)
+
+        # Informační sekce
         rating_widget = ClickableStarFilter()
         rating_widget.setRating(self.film_data.get('rating', 0))
-        layout.addWidget(rating_widget, 0, Qt.AlignmentFlag.AlignCenter)
+        main_layout.addWidget(rating_widget, 0, Qt.AlignmentFlag.AlignCenter)
 
-        # Přidáváme tlačítka
-        button_layout = QHBoxLayout()
+        country_label = QLabel(f"<b>Země:</b> {self.film_data.get('country', 'N/A')}")
+        country_label.setObjectName("backSideLabel")
+        main_layout.addWidget(country_label)
+
+        genres_text = self.film_data.get('genres', '')
+        if genres_text:
+            genre_layout = FlowLayout(spacing=5)
+            for genre in genres_text.split(','):
+                genre_tag = TagButton(genre.strip())
+                genre_tag.setEnabled(False)
+                genre_layout.addWidget(genre_tag)
+            main_layout.addLayout(genre_layout)
+
+        # Popis filmu
+        overview = QTextEdit()
+        overview.setObjectName("overviewText")
+        overview.setText(self.film_data.get('overview', 'Popis není k dispozici.'))
+        overview.setReadOnly(True)
+        main_layout.addWidget(overview, stretch=1)
+
+        # Tlačítka Upravit a Smazat
+        edit_delete_layout = QHBoxLayout()
         btn_edit = QPushButton("Upravit")
         btn_delete = QPushButton("Smazat")
-        button_layout.addWidget(btn_edit)
-        button_layout.addWidget(btn_delete)
-        layout.addLayout(button_layout)
+        edit_delete_layout.addStretch()
+        edit_delete_layout.addWidget(btn_edit)
+        edit_delete_layout.addWidget(btn_delete)
+        main_layout.addLayout(edit_delete_layout)
 
-        # Slovník obsahuje VŠECHNY tři klíče pro novou funkcionalitu
+        # Slovník interaktivních prvků pro hlavní okno
         interactive_widgets = {
-            "edit_button": btn_edit,
-            "delete_button": btn_delete,
             "rating_widget": rating_widget,
-            "player": getattr(self, 'player', None),
+            "edit_button": btn_edit,
+            "delete_button": btn_delete
         }
-        return widget, interactive_widgets
+        return back_widget, interactive_widgets
 
     def update_data(self, film_data, select_mode=False):
         self.film_data = film_data
 
-        if self.title_label.text() != film_data.get("title", "???"):
-            self.title_label.setText(film_data.get("title", "???"))
+        new_title = film_data.get("title", "???")
+        if self.title_label.text() != new_title:
+            self.title_label.setText(new_title)
 
-        pix = QPixmap(self.film_data.get("poster", PLACEHOLDER_POSTER)).scaled(175, 225,
-                                                                               Qt.AspectRatioMode.KeepAspectRatio,
-                                                                               Qt.TransformationMode.SmoothTransformation)
+        new_year = str(film_data.get("year", ""))
+        if self.year_label.text() != new_year:
+            self.year_label.setText(new_year)
+
+        pixmap_path = film_data.get("poster") or PLACEHOLDER_POSTER
+        pix = QPixmap(pixmap_path).scaled(175, 225,
+                                          Qt.AspectRatioMode.KeepAspectRatio,
+                                          Qt.TransformationMode.SmoothTransformation)
         self.poster_label.setPixmap(pix)
 
         self.rating_widget.setRating(film_data.get("rating", 0))
