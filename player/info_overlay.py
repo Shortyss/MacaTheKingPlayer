@@ -1,9 +1,13 @@
 from PyQt6.QtWidgets import QWidget, QLabel, QVBoxLayout
 from PyQt6.QtCore import Qt, QTimer
 
+from player.library.styles import get_info_overlay_sytlesheet
+
+
 class InfoOverlay(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
+        self.setStyleSheet(get_info_overlay_sytlesheet())
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.setAttribute(Qt.WidgetAttribute.WA_NoSystemBackground)
         self.setWindowFlags(Qt.WindowType.Widget)
@@ -12,19 +16,6 @@ class InfoOverlay(QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.label = QLabel("", self)
-        self.label.setStyleSheet("""
-            QLabel {
-                background: rgba(0,0,0,170);
-                color: #aaffbb;
-                border-radius: 13px;
-                font-size: 19px;
-                padding: 14px 22px;
-                border: 2px solid #41ffae;
-                min-width: 80px;
-                qproperty-alignment: AlignCenter;
-                text-shadow: 0 0 4px #4f8, 0 0 12px #0ff;
-            }
-        """)
         layout.addWidget(self.label)
         self.setLayout(layout)
 

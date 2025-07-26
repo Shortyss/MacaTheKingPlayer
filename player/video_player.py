@@ -9,10 +9,13 @@ from PyQt6.QtCore import (
     QPropertyAnimation, QEasingCurve, QEvent, QSize
 )
 
+from .donate_window import DonateOverlay
 from .info_overlay import InfoOverlay
 from .overlay import ControlOverlay
 from .playlist import PlaylistWindow, cleanup_default_playlist, get_connection
 from player.library.library_window import LibraryWindow
+from .settings_window import SettingsWindow
+
 
 class PlayerWindow(QWidget):
     def __init__(self, parent=None):
@@ -111,6 +114,9 @@ class PlayerWindow(QWidget):
         self.info_overlay = InfoOverlay(self)
         self.info_overlay.hide()
 
+        self.donate_overlay = DonateOverlay(self)
+        self.donate_overlay.hide()
+
         self.bottom.hide()
 
 
@@ -120,6 +126,8 @@ class PlayerWindow(QWidget):
         self.view.setSceneRect(0, 0, self.width(), self.height())
         self._compute_positions()
         QTimer.singleShot(0, self.fix_overlay_position)
+        if self.donate_overlay and self.donate_overlay.isVisible():
+            self.center_widget(self.donate_overlay)
 
     def _compute_positions(self):
         W, H = self.width(), self.height()
@@ -301,8 +309,18 @@ class PlayerWindow(QWidget):
         self.info_overlay.show_volume(val)
 
     def on_donate(self):
-        # TODO: donate
+        self.donate_overlay.adjustSize()
+        self.donate_overlay.show()
+        self.donate_overlay.raise_()
+        self.center_widget(self.donate_overlay)
         print("Díky, právě jsi mě skoro rozbrečel radostí!")
+
+    def center_widget(self, widget):
+        widget_size = widget.sizeHint()
+        parent_size = self.size()
+        x = (parent_size.width() - widget_size.width()) // 2
+        y = (parent_size.height() - widget_size.height()) // 2
+        widget.move(x, y)
 
     def on_playlist_closed(self):
         self.playlist_window = None
@@ -359,7 +377,6 @@ class PlayerWindow(QWidget):
             self.current_index += 1
             self.load_from_playlist(self.current_playlist[self.current_index], self.current_playlist,
                                     self.current_index)
-            # Tady už je self.current_index na správném místě
             if self.playlist_window and self.playlist_window.isVisible():
                 filepath = self.current_playlist[self.current_index]
                 self.playlist_window.highlight_current_film(filepath)
@@ -381,7 +398,6 @@ class PlayerWindow(QWidget):
 
     def handle_player_drop(self, files):
         if files:
-            print(f"handle_player_drop: Přetažen soubor na přehrávač: {files}")
             playlist_files, idx = self.add_file_to_default_playlist(files[0])
             self.play_from_playlist(files[0], playlist_files, idx)
             if self.playlist_window and self.playlist_window.isVisible():
@@ -397,7 +413,10 @@ class PlayerWindow(QWidget):
         self.library_window.show()
 
     def on_settings(self):
-        print("Otevřít nastavení - ve vývoji.")
+        dialog = SettingsWindow(self)
+        result = dialog.exec()
+        if result:
+            self.close()
 
     def on_effects_volume(self):
         print("Ovládání efektů - zatím sci-fi.")
@@ -442,21 +461,18 @@ class DraggableGraphicsView(QGraphicsView):
     def dragEnterEvent(self, event):
         if event.mimeData().hasUrls():
             event.acceptProposedAction()
-            print("DRAG ENTER na VIEW!")  # debug
         else:
             event.ignore()
 
     def dragMoveEvent(self, event):
         if event.mimeData().hasUrls():
             event.acceptProposedAction()
-            print("DRAG MOVE na VIEW!")  # debug
         else:
             event.ignore()
 
     def dropEvent(self, event):
         if event.mimeData().hasUrls():
             files = [url.toLocalFile() for url in event.mimeData().urls() if url.isLocalFile()]
-            print("DROP na VIEW!", files)
             if self.on_drop_callback:
                 self.on_drop_callback(files)
             event.acceptProposedAction()

@@ -1,5 +1,5 @@
 import os
-from PyQt6.QtCore import pyqtSignal, Qt
+from PyQt6.QtCore import pyqtSignal, Qt, QCoreApplication
 from PyQt6.QtGui import QPixmap
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QLineEdit,
@@ -23,8 +23,8 @@ class EditFilmWindow(QWidget):
         self.new_poster_path = self.film_data.get('poster')
         self.genre_buttons = []
 
-        self.setWindowTitle(f"Úprava filmu: {self.film_data.get('title', '...')}")
-        self.setMinimumSize(600, 600)
+        self.setWindowTitle(f"{self.tr('Úprava filmu:')} {self.film_data.get('title', '...')}")
+        self.setMinimumSize(600, 650)
 
         main_layout = QVBoxLayout(self)
         form_layout = QFormLayout()
@@ -32,54 +32,54 @@ class EditFilmWindow(QWidget):
 
         # Pole pro základní info
         self.title_edit = QLineEdit(self.film_data.get('title'))
-        form_layout.addRow("Nový název:", self.title_edit)
+        form_layout.addRow(self.tr("Nový název:"), self.title_edit)
 
         self.year_edit = QLineEdit(str(self.film_data.get('year', '')))
-        form_layout.addRow("Rok vydání:", self.year_edit)
+        form_layout.addRow(self.tr("Rok vydání:"), self.year_edit)
 
         self.country_edit = QLineEdit(self.film_data.get('country', ''))
-        self.country_edit.setPlaceholderText("Země oddělené čárkou, např. USA, Německo")
-        form_layout.addRow("Země původu:", self.country_edit)
+        self.country_edit.setPlaceholderText(self.tr("Země oddělené čárkou, např. USA, Německo"))
+        form_layout.addRow(self.tr("Země původu:"), self.country_edit)
 
         self.trailer_edit = QLineEdit(self.film_data.get('trailer_url', ''))
-        self.trailer_edit.setPlaceholderText("Vložte odkaz na trailer (např. z YouTube)")
-        form_layout.addRow("Odkaz na trailer:", self.trailer_edit)
+        self.trailer_edit.setPlaceholderText(self.tr("Vložte odkaz na trailer (např. z YouTube)"))
+        form_layout.addRow(self.tr("Odkaz na trailer:"), self.trailer_edit)
 
         # Výběr žánrů
         genres_string = self.film_data.get('genres') or ''
         current_genres = {genre.strip() for genre in genres_string.split(',') if genre}
         genre_layout = FlowLayout(spacing=8)
         for genre_name in ALL_GENRES:
-            button = TagButton(genre_name)
+            button = TagButton(QCoreApplication.translate("Genres", genre_name))
             if genre_name in current_genres:
                 button.setChecked(True)
             self.genre_buttons.append(button)
             genre_layout.addWidget(button)
-        form_layout.addRow("Žánry:", genre_layout)
+        form_layout.addRow(self.tr("Žánry:"), genre_layout)
 
         # Plakát a popis
         poster_layout = QHBoxLayout()
         self.poster_label = QLabel()
         self.poster_label.setFixedSize(100, 150)
         self.update_poster_preview(self.new_poster_path)
-        btn_change_poster = QPushButton("Změnit plakát")
+        btn_change_poster = QPushButton(self.tr("Změnit plakát"))
         btn_change_poster.clicked.connect(self.change_poster)
         poster_layout.addWidget(self.poster_label)
         poster_layout.addWidget(btn_change_poster, alignment=Qt.AlignmentFlag.AlignTop)
-        form_layout.addRow("Plakát:", poster_layout)
+        form_layout.addRow(self.tr("Plakát:"), poster_layout)
 
         self.overview_edit = QTextEdit(self.film_data.get('overview'))
-        self.overview_edit.setPlaceholderText("Zde napište stručný popis filmu...")
+        self.overview_edit.setPlaceholderText(self.tr("Zde napište stručný popis filmu..."))
         self.overview_edit.setMinimumHeight(100)
-        form_layout.addRow("Popis filmu:", self.overview_edit)
+        form_layout.addRow(self.tr("Popis filmu:"), self.overview_edit)
 
         main_layout.addLayout(form_layout)
         main_layout.addStretch()
 
         # Tlačítka Uložit / Zrušit
         button_layout = QHBoxLayout()
-        self.btn_save = QPushButton("Uložit změny")
-        self.btn_cancel = QPushButton("Zrušit")
+        self.btn_save = QPushButton(self.tr("Uložit změny"))
+        self.btn_cancel = QPushButton(self.tr("Zrušit"))
         button_layout.addStretch()
         button_layout.addWidget(self.btn_save)
         button_layout.addWidget(self.btn_cancel)
@@ -88,7 +88,7 @@ class EditFilmWindow(QWidget):
         self.btn_save.clicked.connect(self.save_changes)
 
     def change_poster(self):
-        filepath, _ = QFileDialog.getOpenFileName(self, "Vyberte nový plakát", "", "Obrázky (*.png *.jpg *.jpeg)")
+        filepath, _ = QFileDialog.getOpenFileName(self, self.tr("Vyberte nový plakát"), "", self.tr("Obrázky (*.png *.jpg *.jpeg)"))
         if filepath:
             self.new_poster_path = filepath
             self.update_poster_preview(filepath)
@@ -111,10 +111,13 @@ class EditFilmWindow(QWidget):
             new_filepath = os.path.join(directory, new_title + extension)
             try:
                 if os.path.exists(new_filepath):
-                    raise FileExistsError(f"Soubor s názvem '{new_title}{extension}' již existuje.")
+                    raise FileExistsError(f"{self.tr('Soubor s názvem')}'{new_title}{extension}' {self.tr('již existuje.')}")
                 os.rename(old_filepath, new_filepath)
             except (OSError, FileExistsError) as e:
-                QMessageBox.critical(self, "Chyba při přejmenování", f"Nepodařilo se přejmenovat soubor.\nChyba: {e}")
+                QMessageBox.critical(self,
+                                     self.tr("Chyba při přejmenování"),
+                                     f"{self.tr('Nepodařilo se přejmenovat soubor.\nChyba:')} {e}"
+                                     )
                 return
 
         # Sběr dat z nových polí

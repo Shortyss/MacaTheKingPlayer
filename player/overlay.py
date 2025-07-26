@@ -3,6 +3,9 @@ from PyQt6.QtGui import QMouseEvent, QIcon
 from PyQt6.QtCore import pyqtSignal, Qt, QSize
 from PyQt6.QtMultimedia import QMediaPlayer
 
+from player.library.styles import get_overlay_stylesheet
+
+
 class ClickableSlider(QSlider):
     def __init__(self, orientation, parent=None):
         super().__init__(orientation, parent)
@@ -36,6 +39,7 @@ class ControlOverlay(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setObjectName("ControlOverlay")
+        self.setStyleSheet(get_overlay_stylesheet())
         self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
 
@@ -63,79 +67,79 @@ class ControlOverlay(QWidget):
         self.prev_button = QPushButton(self.bg_panel)
         self.prev_button.setIcon(self.prev_icon)
         self.prev_button.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.prev_button.setToolTip("Předchozí stopa")
+        self.prev_button.setToolTip(self.tr("Předchozí stopa"))
         self.prev_button.setProperty("class", "media")
 
         self.back10_button = QPushButton(self.bg_panel)
         self.back10_button.setIcon(self.back10_icon)
         self.back10_button.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.back10_button.setToolTip("Zpět o 10s")
+        self.back10_button.setToolTip(self.tr("Zpět o 10s"))
         self.back10_button.setProperty("class", "media")
 
         self.play_pause_button = QPushButton(self.bg_panel)
         self.play_pause_button.setIcon(self.play_icon)
         self.play_pause_button.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.play_pause_button.setToolTip("Play / Pause")
+        self.play_pause_button.setToolTip(self.tr("Play / Pause"))
         self.play_pause_button.setProperty("class", "media")
 
         self.stop_button = QPushButton(self.bg_panel)
         self.stop_button.setIcon(self.stop_icon)
         self.stop_button.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.stop_button.setToolTip("Stop")
+        self.stop_button.setToolTip(self.tr("Stop"))
         self.stop_button.setProperty("class", "media")
 
         self.forward10_button = QPushButton(self.bg_panel)
         self.forward10_button.setIcon(self.forward10_icon)
         self.forward10_button.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.forward10_button.setToolTip("Vpřed o 10s")
+        self.forward10_button.setToolTip(self.tr("Vpřed o 10s"))
         self.forward10_button.setProperty("class", "media")
 
         self.next_button = QPushButton(self.bg_panel)
         self.next_button.setIcon(self.next_icon)
         self.next_button.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.next_button.setToolTip("Další stopa")
+        self.next_button.setToolTip(self.tr("Další stopa"))
         self.next_button.setProperty("class", "media")
 
         self.mute_button = QPushButton(self.bg_panel)
         self.mute_button.setIcon(self.unmute_icon)
         self.mute_button.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.mute_button.setToolTip("Ztlumit / Zapnout zvuk")
+        self.mute_button.setToolTip(self.tr("Ztlumit / Zapnout zvuk"))
         self.mute_button.setProperty("class", "circle")
 
         self.fullscreen_button = QPushButton(self.bg_panel)
         self.fullscreen_button.setIcon(self.fullscreen_icon)
         self.fullscreen_button.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.fullscreen_button.setToolTip("Fullscreen")
+        self.fullscreen_button.setToolTip(self.tr("Fullscreen"))
         self.fullscreen_button.setProperty("class", "circle")
 
         self.donate_button = QPushButton(self.bg_panel)
         self.donate_button.setIcon(self.donate_icon)
         self.donate_button.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.donate_button.setToolTip("Podpořit vývoj")
+        self.donate_button.setToolTip(self.tr("Podpořit vývoj"))
         self.donate_button.setProperty("class", "donate")
 
         self.playlist_button = QPushButton(self.bg_panel)
         self.playlist_button.setIcon(self.playlist_icon)
         self.playlist_button.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.playlist_button.setToolTip("Playlisty")
+        self.playlist_button.setToolTip(self.tr("Playlisty"))
         self.playlist_button.setProperty("class", "circle")
 
         self.library_button = QPushButton(self.bg_panel)
         self.library_button.setIcon(self.library_icon)
         self.library_button.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.library_button.setToolTip("Zpět do knihovny")
+        self.library_button.setToolTip(self.tr("Zpět do knihovny"))
         self.library_button.setProperty("class", "home")
 
         self.settings_button = QPushButton(self.bg_panel)
         self.settings_button.setIcon(self.settings_icon)
         self.settings_button.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.settings_button.setToolTip("Nastavení")
+        self.settings_button.setToolTip(self.tr("Nastavení"))
         self.settings_button.setProperty("class", "circle")
 
         self.effects_button = QPushButton(self.bg_panel)
         self.effects_button.setIcon(self.effects_icon)
         self.effects_button.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.effects_button.setToolTip("Hlasitost efektů")
+        self.effects_button.setToolTip(self.tr("Hlasitost efektů"))
         self.effects_button.hide()
 
         # Volume slider:
@@ -202,101 +206,9 @@ class ControlOverlay(QWidget):
         self.mute_button.clicked.connect(self.mute_toggled)
         self.effects_button.clicked.connect(lambda: self.effects_volume_pressed.emit())
 
-        self.bg_panel.setStyleSheet("""
-            #OverlayPanel {
-                background: qlineargradient(
-                    x1:0, y1:0, x2:1, y2:1,
-                    stop:0 rgba(60, 110, 160, 190),
-                    stop:1 rgba(28, 36, 62, 170)
-                );
-                border-radius: 20px;
-                border: 1.5px solid qlineargradient(
-                    x1:0, y1:0, x2:1, y2:1,
-                    stop:0 #5eefff, 
-                    stop:0.25 #32ffd2,
-                    stop:0.55 #aaff80,
-                    stop:0.8 #0fd9ff,
-                    stop:1 #1fa2ff
-                );
-            }
-        
-            QLabel {
-                color: #f8fff8;
-                font-weight: bold;
-                font-size: 11px;
-                background: transparent;
-            }
-
-            QPushButton[class="media"], QPushButton[class="home"], QPushButton[class="donate"] {
-                background: qradialgradient(
-                    cx:0.5, cy:0.55, radius:0.82, fx:0.5, fy:0.5,
-                    stop:0 #283950, stop:0.5 #26466e, stop:0.9 #365b82, stop:1 transparent);
-                border-radius: 16px;
-                border: 1.1px solid #1affb388;
-                min-width: 34px; min-height: 36px; max-height: 40px;
-                color: #eafff7;
-            }
-            QPushButton[class="media"]:hover, QPushButton[class="home"]:hover, QPushButton[class="donate"]:hover, QPushButton[class="circle"]:hover{
-                background: qradialgradient(cx:0.5, cy:0.52, radius:0.7, fx:0.5, fy:0.5,
-                    stop:0 #41ffe7, stop:0.7 #162c2c, stop:1 transparent);
-                border: 1.5px solid #22ffc6;
-            }
-
-            QPushButton[class="circle"] {
-                background: qradialgradient(
-                    cx:0.5, cy:0.55, radius:0.82, fx:0.5, fy:0.5,
-                    stop:0 #283950, stop:0.5 #26466e, stop:0.9 #365b82, stop:1 transparent
-                );
-                width: 32px; height: 32px;
-                min-width: 32px; min-height: 32px;
-                max-width: 32px; max-height: 32px;
-                border-radius: 16px;
-                border: 1.2px solid #20ffe988;
-                color: #f2fff8;
-            }
-
-            QPushButton[class="home"], QPushButton[class="donate"] {
-                min-width: 44px; min-height: 44px;
-                max-width: 44px; max-height: 44px;
-                border-radius: 22px;
-            }
-            
-            QPushButton > * {
-                color: #eafff7;
-            }
-
-            QPushButton {
-                border-width: 1.1px;
-            }
-            
-            QToolTip {
-                color: #181e2a;                 
-                background: #eafff7;             
-                border: 1px solid #37ffe6;       
-                font-size: 10px;
-                border-radius: 4px;
-                padding: 4px 4px;
-            }
-         
-            QSlider::sub-page:horizontal {
-                background: qlineargradient(
-                    x1:0, y1:0, x2:1, y2:1,
-                    stop:0 #81f7ff, stop:1 #aaff00
-                );
-                border-radius: 4px;
-            }
-            QSlider::handle:horizontal {
-                background: #f8fff8;
-                width: 8px; height: 8px;
-                border-radius: 3px;
-                border: 2px solid #c0ff95;
-            }
-        """)
-
         if self.window():
             self.window().setFocus()
 
-        # will be injected
         self.player = None
         self.hide()
 

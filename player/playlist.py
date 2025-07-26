@@ -8,40 +8,8 @@ from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QListWidget, QPu
 )
 from PyQt6.QtCore import Qt, QPoint
 
-
-DB_PATH = "playlist.db"
-
-def get_connection():
-    con = sqlite3.connect(DB_PATH)
-    cur = con.cursor()
-    cur.execute("""
-        CREATE TABLE IF NOT EXISTS playlists (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL UNIQUE
-        )
-    """)
-    cur.execute("""
-        CREATE TABLE IF NOT EXISTS playlist_items (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            playlist_id INTEGER NOT NULL,
-            filename TEXT NOT NULL,
-            position INTEGER NOT NULL,
-            FOREIGN KEY(playlist_id) REFERENCES playlists(id)
-        )
-    """)
-    con.commit()
-    return con
-
-def init_settings_table():
-    with get_connection() as con:
-        cur = con.cursor()
-        cur.execute("""
-            CREATE TABLE IF NOT EXISTS settings (
-                key TEXT PRIMARY KEY,
-                value TEXT
-            )
-        """)
-        con.commit()
+from player.library.styles import get_playlist_stylesheet
+from player.settings_manager import get_connection, set_setting, get_setting
 
 
 class FilmListWidget(QListWidget):
@@ -74,26 +42,13 @@ class FilmListWidget(QListWidget):
                 self.parent().reorder_films()
 
 
-def set_setting(key, value):
-    with get_connection() as con:
-        cur = con.cursor()
-        cur.execute("INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)", (key, value))
-        con.commit()
-
-def get_setting(key, default=None):
-    with get_connection() as con:
-        cur = con.cursor()
-        cur.execute("SELECT value FROM settings WHERE key=?", (key,))
-        row = cur.fetchone()
-        return row[0] if row else default
-
-
 class PlaylistWindow(QWidget):
     def __init__(self, player_callback, on_close_callback, main_window_ref=None):
         super().__init__()
+        self.setStyleSheet(get_playlist_stylesheet())
         self.setAcceptDrops(True)
         self.setEnabled(True)
-        self.setWindowTitle("Playlisty")
+        self.setWindowTitle(self.tr("Playlisty"))
         self.setWindowIcon(QIcon("assets/icons/KingPlayer6.png"))
         self.resize(420, 480)
         self.dock_offset = QPoint(0, 0)
@@ -106,10 +61,10 @@ class PlaylistWindow(QWidget):
         layout = QHBoxLayout(self)
         playlist_layout = QVBoxLayout()
         self.playlist_list = QListWidget()
-        self.btn_add_playlist = QPushButton("Nový playlist")
-        self.btn_delete_playlist = QPushButton("Smazat playlist")
-        self.btn_rename_playlist = QPushButton("Přejmenovat")
-        playlist_layout.addWidget(QLabel("Playlisty:"))
+        self.btn_add_playlist = QPushButton(self.tr("Nový playlist"))
+        self.btn_delete_playlist = QPushButton(self.tr("Smazat playlist"))
+        self.btn_rename_playlist = QPushButton(self.tr("Přejmenovat"))
+        playlist_layout.addWidget(QLabel(self.tr("Playlisty:")))
         playlist_layout.addWidget(self.playlist_list)
         playlist_layout.addWidget(self.btn_add_playlist)
         playlist_layout.addWidget(self.btn_delete_playlist)
@@ -125,65 +80,11 @@ class PlaylistWindow(QWidget):
 
         self.setWindowOpacity(0.66)
 
-        self.setStyleSheet("""
-            QWidget {
-                background: rgba(34, 43, 66, 100); 
-                border-radius: 20px;
-                color: #eafff7;
-                font-family: Segoe UI, Arial, sans-serif;
-                font-size: 15px;
-            }
-            QListWidget {
-                background: #232941;
-                border-radius: 14px;
-                border: 1.5px solid #32ffd299;
-                color: #f8fff8;
-                font-size: 15px;
-                padding: 5px;
-                selection-background-color: #41ffe7; 
-                selection-color: #000000;    
-                outline: none;
-            }
-            QListWidget::item:selected {
-                background: #22ffc6;  
-                color: #000000;      
-                border-radius: 8px;
-            }
-            QPushButton {
-                background: qradialgradient(
-                    cx:0.5, cy:0.55, radius:0.82, fx:0.5, fy:0.5,
-                    stop:0 #283950, stop:0.5 #26466e, stop:0.9 #365b82, stop:1 transparent
-                );
-                border-radius: 14px;
-                border: 1.2px solid #20ffe988;
-                color: #000000;  
-                font-weight: bold;
-                min-width: 90px; min-height: 30px;
-                margin-top: 4px;
-                margin-bottom: 4px;
-            }
-            QPushButton:hover {
-                background: qradialgradient(
-                    cx:0.5, cy:0.52, radius:0.7, fx:0.5, fy:0.5,
-                    stop:0 #41ffe7, stop:0.7 #162c2c, stop:1 transparent
-                );
-                border: 1.8px solid #22ffc6;
-                color: #000000;  
-            }
-            QLabel {
-                color: #aaf0fc;
-                font-size: 14px;
-                background: transparent;
-                font-weight: 600;
-                letter-spacing: 0.5px;
-            }
-        """)
-
         self.current_playing_file = None
 
-        self.btn_add_film = QPushButton("Přidat film")
-        self.btn_remove_film = QPushButton("Smazat film")
-        film_layout.addWidget(QLabel("Filmy v playlistu:"))
+        self.btn_add_film = QPushButton(self.tr("Přidat film"))
+        self.btn_remove_film = QPushButton(self.tr("Smazat film"))
+        film_layout.addWidget(QLabel(self.tr("Filmy v playlistu:")))
         film_layout.addWidget(self.film_list)
         film_layout.addWidget(self.btn_add_film)
         film_layout.addWidget(self.btn_remove_film)
@@ -234,11 +135,11 @@ class PlaylistWindow(QWidget):
         self.load_films()
 
     def add_playlist(self):
-        name, ok = QInputDialog.getText(self, "Nový playlist", "Zadej název:")
+        name, ok = QInputDialog.getText(self, self.tr("Nový playlist"), self.tr("Zadej název:"))
 
         if ok and name:
             if name.lower() == 'default':
-                QMessageBox.warning(self, "Chyba", "Název 'Default' je rezervovaný a nelze ho použít.")
+                QMessageBox.warning(self, self.tr("Chyba"), self.tr("Název 'Default' je rezervovaný a nelze ho použít."))
                 return
 
             try:
@@ -254,7 +155,7 @@ class PlaylistWindow(QWidget):
                 self.playlist_list.setCurrentItem(item)
 
             except sqlite3.IntegrityError:
-                QMessageBox.warning(self, "Chyba", f"Playlist s názvem '{name}' již existuje.")
+                QMessageBox.warning(self, self.tr("Chyba"), self.tr(f"Playlist s názvem '{name}' již existuje."))
 
     def delete_playlist(self):
         item = self.playlist_list.currentItem()
@@ -275,11 +176,11 @@ class PlaylistWindow(QWidget):
 
         id_ = item.data(Qt.ItemDataRole.UserRole)
         old_name = item.text()
-        new_name, ok = QInputDialog.getText(self, "Přejmenovat", "Nový název:", text=old_name)
+        new_name, ok = QInputDialog.getText(self, self.tr("Přejmenovat"), self.tr("Nový název:"), text=old_name)
 
         if ok and new_name and new_name != old_name:
             if new_name.lower() == 'default':
-                QMessageBox.warning(self, "Chyba", "Název 'Default' je rezervovaný a nelze ho použít.")
+                QMessageBox.warning(self, self.tr("Chyba"), self.tr("Název 'Default' je rezervovaný a nelze ho použít."))
                 return
 
             try:
@@ -289,7 +190,7 @@ class PlaylistWindow(QWidget):
 
 
             except sqlite3.IntegrityError:
-                QMessageBox.warning(self, "Chyba", f"Playlist s názvem '{new_name}' již existuje.")
+                QMessageBox.warning(self, self.tr("Chyba"), self.tr(f"Playlist s názvem '{new_name}' již existuje."))
 
 
     def load_films(self):
@@ -322,7 +223,7 @@ class PlaylistWindow(QWidget):
             return cur.lastrowid
 
     def add_film(self):
-        files, _ = QFileDialog.getOpenFileNames(self, "Přidat filmy", "", "Videa (*.mp4 *.avi *.mkv)")
+        files, _ = QFileDialog.getOpenFileNames(self, self.tr("Přidat filmy"), "", self.tr("Videa (*.mp4 *.avi *.mkv)"))
         playlist_id = self.current_playlist_id or self.ensure_playlist_exists()
         self.current_playlist_id = playlist_id
         if files:
@@ -379,7 +280,7 @@ class PlaylistWindow(QWidget):
 
     def add_files_to_current_playlist(self, files: list):
         if not self.current_playlist_id:
-            QMessageBox.warning(self, "Chyba", "Není vybrán žádný playlist.")
+            QMessageBox.warning(self, self.tr("Chyba"), self.tr("Není vybrán žádný playlist."))
             return
 
         with get_connection() as con:

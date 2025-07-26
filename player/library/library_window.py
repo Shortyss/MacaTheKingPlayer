@@ -4,7 +4,7 @@ from glob import glob
 
 
 from PyQt6.QtCore import Qt, QThread, QTimer, QPropertyAnimation, QRect, \
-    QEasingCurve, QPoint, QVariantAnimation, QSettings
+    QEasingCurve, QPoint, QVariantAnimation, QSettings, QCoreApplication
 
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton,
@@ -30,7 +30,7 @@ from .styles import get_main_stylesheet
 class LibraryWindow(QWidget):
     def __init__(self, player_window=None, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("Královská knihovna filmů – The King's Player")
+        self.setWindowTitle("The King's Player - library")
         self.setWindowState(Qt.WindowState.WindowFullScreen)
 
         self.player_window = player_window
@@ -83,23 +83,23 @@ class LibraryWindow(QWidget):
         filter_layout.setSpacing(20)
 
         # Blok 1: Rychlé filtry
-        filter_layout.addWidget(QLabel("Základní filtry"))
+        filter_layout.addWidget(QLabel(self.tr("Základní filtry")))
         fast_filters_group = QFrame(self)
         fast_filters_group.setObjectName("groupBox")
         fast_filters_layout = QVBoxLayout(fast_filters_group)
 
         self.title_filter = QLineEdit()
-        self.title_filter.setPlaceholderText("Hledat podle názvu...")
+        self.title_filter.setPlaceholderText(self.tr("Hledat podle názvu..."))
         fast_filters_layout.addWidget(self.title_filter)
 
-        fast_filters_layout.addWidget(QLabel("Minimální hodnocení:"))
+        fast_filters_layout.addWidget(QLabel(self.tr("Minimální hodnocení:")))
         self.rating_filter = ClickableStarFilter()
         fast_filters_layout.addWidget(self.rating_filter, alignment=Qt.AlignmentFlag.AlignCenter)
 
         filter_layout.addWidget(fast_filters_group)
 
         # Blok 2: Pokročilé filtry
-        filter_layout.addWidget(QLabel("Pokročilé filtry"))
+        filter_layout.addWidget(QLabel(self.tr("Pokročilé filtry")))
         adv_filters_group = QFrame(self)
         adv_filters_group.setObjectName("groupBox")
         adv_filters_layout = QVBoxLayout(adv_filters_group)
@@ -107,40 +107,41 @@ class LibraryWindow(QWidget):
         # Rok vydání (vedle sebe)
         year_layout = QHBoxLayout()
         self.year_filter_from = QLineEdit()
-        self.year_filter_from.setPlaceholderText("Rok od")
+        self.year_filter_from.setPlaceholderText(self.tr("Rok od"))
         self.year_filter_to = QLineEdit()
-        self.year_filter_to.setPlaceholderText(f"Rok do ({datetime.date.today().year})")
+        self.year_filter_to.setPlaceholderText(f"{self.tr('Rok do')} ({datetime.date.today().year})")
         year_layout.addWidget(self.year_filter_from)
         year_layout.addWidget(QLabel("–"))
         year_layout.addWidget(self.year_filter_to)
         adv_filters_layout.addLayout(year_layout)
 
         # Ostatní filtry
-        adv_filters_layout.addWidget(QLabel("Délka:"))
+        adv_filters_layout.addWidget(QLabel(self.tr("Délka:")))
         self.length_layout = FlowLayout(spacing=8)
         self.length_buttons = []
-        self.length_options = {
-            "Do 90 min": (0, 90),
-            "90-120 min": (90, 120),
-            "Nad 120 min": (120, 9999)
-        }
-        for text in self.length_options.keys():
-            button = TagButton(text)
+        self.length_options = [
+            {"label": self.tr("Do 90 min"), "range": (0, 90), "id": "under_90"},
+            {"label": self.tr("90-120 min"), "range": (90, 120), "id": "90_120"},
+            {"label": self.tr("Nad 120 min"), "range": (120, 9999), "id": "over_120"}
+        ]
+        for option in self.length_options:
+            button = TagButton(option['label'])
+            button.setProperty("filter_id", option['id'])
             self.length_layout.addWidget(button)
             self.length_buttons.append(button)
         adv_filters_layout.addLayout(self.length_layout)
 
-        adv_filters_layout.addWidget(QLabel("Země původu:"))
+        adv_filters_layout.addWidget(QLabel(self.tr("Země původu:")))
         self.country_layout = FlowLayout(spacing=8)
         self.country_buttons = []
         adv_filters_layout.addLayout(self.country_layout)
 
-        adv_filters_layout.addWidget(QLabel("Žánry:"))
+        adv_filters_layout.addWidget(QLabel(self.tr("Žánry:")))
         self.genre_layout = FlowLayout(spacing=8)
         self.genre_buttons = {}
 
         for genre in ALL_GENRES:
-            button = TagButton(genre)
+            button = TagButton(QCoreApplication.translate("Genres", genre))
             button.stateChanged.connect(self.apply_filters)
             self.genre_layout.addWidget(button)
             self.genre_buttons[genre] = button
@@ -149,7 +150,7 @@ class LibraryWindow(QWidget):
         filter_layout.addWidget(adv_filters_group)
 
         # Blok 3: Správa Knihovny
-        filter_layout.addWidget(QLabel("Správa knihovny"))
+        filter_layout.addWidget(QLabel(self.tr("Správa knihovny")))
         library_group = QFrame(self)
         library_group.setObjectName("groupBox")
         library_layout = QVBoxLayout(library_group)
@@ -158,27 +159,27 @@ class LibraryWindow(QWidget):
         library_layout.addWidget(self.library_paths_list)
 
         path_buttons_layout = QHBoxLayout()
-        self.btn_add_path = QPushButton("Přidat složku")
-        self.btn_remove_path = QPushButton("Odebrat")
+        self.btn_add_path = QPushButton(self.tr("Přidat složku"))
+        self.btn_remove_path = QPushButton(self.tr("Odebrat"))
         path_buttons_layout.addWidget(self.btn_add_path)
         path_buttons_layout.addWidget(self.btn_remove_path)
         library_layout.addLayout(path_buttons_layout)
 
-        self.btn_scan_paths = QPushButton("Prohledat knihovnu")
+        self.btn_scan_paths = QPushButton(self.tr("Prohledat knihovnu"))
         library_layout.addWidget(self.btn_scan_paths)
 
         filter_layout.addWidget(library_group)
 
         # Blok 4: Akce a Nastavení
-        filter_layout.addWidget(QLabel("Akce s filmy"))
+        filter_layout.addWidget(QLabel(self.tr("Akce s filmy")))
         actions_group = QFrame(self)
         actions_group.setObjectName("groupBox")
         actions_layout = QGridLayout(actions_group)
 
-        self.btn_select_mode = QPushButton("Označit filmy")
-        self.btn_add_files = QPushButton("Přidat soubory")
-        self.btn_import = QPushButton("Nahrát data")
-        self.btn_remove = QPushButton("Odebrat vybrané")
+        self.btn_select_mode = QPushButton(self.tr("Označit filmy"))
+        self.btn_add_files = QPushButton(self.tr("Přidat soubory"))
+        self.btn_import = QPushButton(self.tr("Nahrát data"))
+        self.btn_remove = QPushButton(self.tr("Odebrat vybrané"))
 
         actions_layout.addWidget(self.btn_select_mode, 0, 0)
         actions_layout.addWidget(self.btn_add_files, 0, 1)
@@ -190,13 +191,13 @@ class LibraryWindow(QWidget):
         # Ukončení
         filter_layout.addStretch(1)
 
-        self.status_label = QLabel("Připraven")
+        self.status_label = QLabel(self.tr("Připraven"))
         self.status_label.setObjectName("statusLabel")
         filter_layout.addWidget(self.status_label)
 
         bottom_buttons_layout = QHBoxLayout()
-        self.btn_toggle_fullscreen = QPushButton("Fullscreen")
-        self.btn_back = QPushButton("Zpět na přehrávač")
+        self.btn_toggle_fullscreen = QPushButton(self.tr("Fullscreen"))
+        self.btn_back = QPushButton(self.tr("Zpět na přehrávač"))
         bottom_buttons_layout.addWidget(self.btn_toggle_fullscreen)
         bottom_buttons_layout.addWidget(self.btn_back)
 
@@ -249,7 +250,7 @@ class LibraryWindow(QWidget):
 
         films_to_update = self.films[:]
         if not films_to_update:
-            self.status_label.setText("Všechny filmy jsou aktuální.")
+            self.status_label.setText(self.tr("Všechny filmy jsou aktuální."))
             return
 
         # Vytvoření a spuštění vlákna
@@ -266,7 +267,7 @@ class LibraryWindow(QWidget):
         # Příprava UI
         QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
         self.btn_import.setEnabled(False)
-        self.status_label.setText("Spouštím stahování dat...")
+        self.status_label.setText(self.tr("Spouštím stahování dat..."))
 
         self.thread.start()
 
@@ -304,8 +305,10 @@ class LibraryWindow(QWidget):
         except ValueError:
             year_to = datetime.date.today().year + 1
 
-
-        selected_lengths = [self.length_options[btn.text()] for btn in self.length_buttons if btn.isChecked()]
+        selected_ids = {btn.property("filter_id") for btn in self.length_buttons if btn.isChecked()}
+        selected_lengths = [
+            opt['range'] for opt in self.length_options if opt['id'] in selected_ids
+        ]
 
         selected_countries = {btn.text() for btn in self.country_buttons if btn.isChecked()}
 
@@ -389,13 +392,13 @@ class LibraryWindow(QWidget):
             self.load_films_from_db()
 
     def add_selected_files(self):
-        filepaths, _ = QFileDialog.getOpenFileNames(self, "Vyber filmy", os.path.expanduser("~"),
-                                                    f"Video soubory ({' '.join(['*' + ext for ext in SUPPORTED_EXTS])})")
+        filepaths, _ = QFileDialog.getOpenFileNames(self, self.tr("Vyber filmy"), os.path.expanduser("~"),
+                                                    f"{self.tr('Video soubory')} ({' '.join(['*' + ext for ext in SUPPORTED_EXTS])})")
         if filepaths:
             self.add_films_to_library(filepaths)
 
     def scan_library_paths(self):
-        self.status_label.setText("Skenuji knihovnu, prosím čekejte...")
+        self.status_label.setText(self.tr(self.tr("Skenuji knihovnu, prosím čekejte...")))
         QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
         QApplication.processEvents()
 
@@ -404,7 +407,7 @@ class LibraryWindow(QWidget):
             paths = [self.library_paths_list.item(i).text() for i in range(self.library_paths_list.count())]
 
             for dirpath in paths:
-                self.status_label.setText(f"Prohledávám: {dirpath}...")
+                self.status_label.setText(f"{self.tr('Prohledávám:')} {dirpath}...")
                 QApplication.processEvents()
 
                 for ext in SUPPORTED_EXTS:
@@ -415,7 +418,7 @@ class LibraryWindow(QWidget):
 
         finally:
             QApplication.restoreOverrideCursor()
-            self.status_label.setText("Skenování dokončeno.")
+            self.status_label.setText(self.tr("Skenování dokončeno."))
 
     def remove_selected_films(self):
         if not self.select_mode: return
@@ -426,7 +429,7 @@ class LibraryWindow(QWidget):
         filepaths_to_delete = [film['filepath'] for film in films_to_delete]
 
         self.btn_remove.setEnabled(False)
-        self.btn_remove.setText("Mažu...")
+        self.btn_remove.setText(self.tr("Mažu..."))
         QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
 
         self.thread = QThread()
@@ -445,7 +448,7 @@ class LibraryWindow(QWidget):
     def on_delete_finished(self, deleted_filepaths):
         QApplication.restoreOverrideCursor()
         self.btn_remove.setEnabled(True)
-        self.btn_remove.setText("Odebrat vybrané")
+        self.btn_remove.setText(self.tr("Odebrat vybrané"))
 
         # Aktualizuje data v paměti a překresli UI
         filepaths_set = set(deleted_filepaths)
@@ -455,7 +458,7 @@ class LibraryWindow(QWidget):
         self.apply_filters()
 
     def add_library_path(self):
-        dirpath = QFileDialog.getExistingDirectory(self, "Vyber složku pro knihovnu", os.path.expanduser("~"))
+        dirpath = QFileDialog.getExistingDirectory(self, self.tr("Vyber složku pro knihovnu"), os.path.expanduser("~"))
         if dirpath:
             items = [self.library_paths_list.item(i).text() for i in range(self.library_paths_list.count())]
             if dirpath not in items:
@@ -658,15 +661,15 @@ class LibraryWindow(QWidget):
 
     def _handle_delete_film(self, film_data):
         filepath = film_data.get('filepath')
-        title = film_data.get('title', 'Tento soubor')
+        title = film_data.get('title', self.tr('Tento soubor'))
         if not filepath:
             return
 
         # Vytvoření potvrzovacího dialogu
         msg_box = QMessageBox(self)
-        msg_box.setWindowTitle("Potvrdit smazání")
-        msg_box.setText(f"Opravdu si přejete trvale smazat film\n{title}?")
-        msg_box.setInformativeText("Tato akce je nevratná.")
+        msg_box.setWindowTitle(self.tr("Potvrdit smazání"))
+        msg_box.setText(f"{self.tr('Opravdu si přejete trvale smazat film')}\n{title}?")
+        msg_box.setInformativeText(self.tr("Tato akce je nevratná."))
         msg_box.setIcon(QMessageBox.Icon.Warning)
         msg_box.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
         msg_box.setDefaultButton(QMessageBox.StandardButton.No)
@@ -720,12 +723,12 @@ class LibraryWindow(QWidget):
                 break
 
     def update_fetch_progress(self, current, total, title):
-        self.status_label.setText(f"Stahuji ({current}/{total}): {title}...")
+        self.status_label.setText(f"{self.tr('Stahuji')} ({current}/{total}): {title}...")
 
     def on_fetching_finished(self):
         QApplication.restoreOverrideCursor()
         self.btn_import.setEnabled(True)
-        self.status_label.setText("Stahování dokončeno.")
+        self.status_label.setText(self.tr("Stahování dokončeno."))
         self.apply_filters()
         self.thread.quit()
         self.thread.wait()

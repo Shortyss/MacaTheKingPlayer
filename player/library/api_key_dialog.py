@@ -6,22 +6,22 @@ from PyQt6.QtCore import Qt
 class ApiKeyDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("Nastavení TMDB API klíče")
+        self.setWindowTitle(self.tr("Nastavení TMDB API klíče"))
 
         layout = QVBoxLayout(self)
 
         instructions = QLabel()
-        instructions.setText(
+        instructions.setText(self.tr(
             "Pro stahování dat je potřeba Váš osobní TMDB API klíč.\n\n"
             "1. Zaregistrujte se na <a href='https://www.themoviedb.org/signup'>TheMovieDB.org</a>.\n"
             "2. Po přihlášení si vygenerujte klíč v Nastavení -> API.\n"
             "3. Vložte klíč do pole níže."
-        )
+        ))
         instructions.setOpenExternalLinks(True)
         layout.addWidget(instructions)
 
         self.api_key_input = QLineEdit()
-        self.api_key_input.setPlaceholderText("Vložte Váš API klíč...")
+        self.api_key_input.setPlaceholderText(self.tr("Vložte Váš API klíč..."))
         layout.addWidget(self.api_key_input)
 
         # Tlačítka OK a Zrušit

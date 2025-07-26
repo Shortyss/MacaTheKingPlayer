@@ -10,7 +10,7 @@ import os
 class TMDB_API:
     def __init__(self, api_key):
         if not api_key:
-            raise ValueError("API klíč pro TMDB chybí!")
+            raise ValueError(self.tr("API klíč pro TMDB chybí!"))
 
         self.tmdb = TMDb()
         self.tmdb.api_key = api_key
@@ -20,11 +20,9 @@ class TMDB_API:
             lang_code, _ = locale.getdefaultlocale()
             # Převod na formát
             self.os_language = lang_code.replace('_', '-')
-            print(f"DEBUG: Jazyk systému detekován jako: {self.os_language}")
         except Exception:
             # Pokud se detekce nepovede, použijeme angličtinu jako výchozí
             self.os_language = 'en-US'
-            print(f"DEBUG: Nepodařilo se detekovat jazyk, používám výchozí: {self.os_language}")
 
         self.tmdb.language = self.os_language
         self.tmdb.debug = False

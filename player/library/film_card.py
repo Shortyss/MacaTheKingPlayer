@@ -125,7 +125,7 @@ class FilmCard(QFrame):
 
         # Hlavní ovládací tlačítka
         controls_layout = QHBoxLayout()
-        btn_play = QPushButton("Přehrát film")
+        btn_play = QPushButton(self.tr("Přehrát film"))
         btn_play.clicked.connect(lambda: self.play_film_requested.emit(self.film_data))
         controls_layout.addWidget(btn_play)
 
@@ -159,7 +159,7 @@ class FilmCard(QFrame):
         rating_widget.setRating(self.film_data.get('rating', 0))
         main_layout.addWidget(rating_widget, 0, Qt.AlignmentFlag.AlignCenter)
 
-        country_label = QLabel(f"<b>Země:</b> {self.film_data.get('country', 'N/A')}")
+        country_label = QLabel(f"<b>{self.tr('Země:')}</b> {self.film_data.get('country', 'N/A')}")
         country_label.setObjectName("backSideLabel")
         main_layout.addWidget(country_label)
 
@@ -175,14 +175,14 @@ class FilmCard(QFrame):
         # Popis filmu
         overview = QTextEdit()
         overview.setObjectName("overviewText")
-        overview.setText(self.film_data.get('overview', 'Popis není k dispozici.'))
+        overview.setText(self.film_data.get('overview', self.tr('Popis není k dispozici.')))
         overview.setReadOnly(True)
         main_layout.addWidget(overview, stretch=1)
 
         # Tlačítka Upravit a Smazat
         edit_delete_layout = QHBoxLayout()
-        btn_edit = QPushButton("Upravit")
-        btn_delete = QPushButton("Smazat")
+        btn_edit = QPushButton(self.tr("Upravit"))
+        btn_delete = QPushButton(self.tr("Smazat"))
         edit_delete_layout.addStretch()
         edit_delete_layout.addWidget(btn_edit)
         edit_delete_layout.addWidget(btn_delete)
