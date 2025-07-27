@@ -1,3 +1,4 @@
+
 from PyQt6.QtCore import Qt, pyqtSignal, QUrl
 from PyQt6.QtGui import QPixmap, QIcon
 from PyQt6.QtWebEngineCore import QWebEngineSettings
@@ -22,7 +23,8 @@ class FilmCard(QFrame):
 
         self.setObjectName("FilmCard")
         self.setFrameShape(QFrame.Shape.NoFrame)
-        self.setFixedSize(230, 380)
+        scale = 0.9
+        self.setFixedSize(int(230 * scale), int(380 * scale))
 
         self.front_widget = self._create_front_widget()
 
@@ -73,10 +75,13 @@ class FilmCard(QFrame):
 
         main_vbox.addStretch(1)
 
+        scale = 0.9
+        poster_w = int(175 * scale)
+        poster_h = int(225 * scale)
         self.poster_label = QLabel()
-        self.poster_label.setFixedSize(175, 225)
+        self.poster_label.setFixedSize(poster_w, poster_h)
         self.poster_label.setScaledContents(True)
-        pix = QPixmap(self.film_data.get("poster", PLACEHOLDER_POSTER)).scaled(175, 225,
+        pix = QPixmap(self.film_data.get("poster", PLACEHOLDER_POSTER)).scaled(poster_w, poster_h,
                                                                                Qt.AspectRatioMode.KeepAspectRatio,
                                                                                Qt.TransformationMode.SmoothTransformation)
         self.poster_label.setPixmap(pix)

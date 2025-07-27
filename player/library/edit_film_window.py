@@ -9,15 +9,13 @@ from PyQt6.QtWidgets import (
 from .constants import ALL_GENRES
 from .custom_widgets import TagButton
 from .flow_layout import FlowLayout
-from .styles import get_main_stylesheet
-
 
 class EditFilmWindow(QWidget):
     film_updated = pyqtSignal(dict, dict)
 
     def __init__(self, film_data, db_manager, parent=None):
         super().__init__(parent)
-        self.setStyleSheet(get_main_stylesheet())
+        # LOKÁLNÍ STYL SMAZÁN
         self.film_data = film_data
         self.db = db_manager
         self.new_poster_path = self.film_data.get('poster')
@@ -130,8 +128,11 @@ class EditFilmWindow(QWidget):
         new_data['country'] = self.country_edit.text().strip()
         new_data['trailer_url'] = self.trailer_edit.text().strip()
 
-        active_genres = [btn.text() for btn in self.genre_buttons if btn.isChecked()]
-        new_data['genres'] = ", ".join(active_genres)
+        # Sběr žánrů
+        selected_genres = [button.text() for button in self.genre_buttons if button.isChecked()]
+        new_data['genres'] = ', '.join(selected_genres)
 
+        # Uložíme do DB
+        self.db.add_or_update_film(new_data)
         self.film_updated.emit(self.film_data, new_data)
         self.close()

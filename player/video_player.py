@@ -432,6 +432,9 @@ class PlayerWindow(QWidget):
             self.next_movie()
 
     def hide_mouse_cursor(self):
+
+        if not self.view.viewport().underMouse() or not self.isActiveWindow():
+            return
         QCursor.setPos(self.mapToGlobal(self.rect().center()))
         self.setCursor(Qt.CursorShape.BlankCursor)
         self.view.setCursor(Qt.CursorShape.BlankCursor)

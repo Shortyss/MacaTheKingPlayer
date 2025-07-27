@@ -24,7 +24,41 @@ from .custom_widgets import (
 from .database_manager import DatabaseManager
 from .film_card import FilmCard
 from .workers import DataFetchingWorker, DeleteWorker
-from .styles import get_main_stylesheet
+from .styles import get_main_stylesheet, get_main_stylesheet_fhd
+
+from PyQt6.QtWidgets import QWidget
+from PyQt6.QtGui import QFont
+
+def scale_widget_fonts_and_sizes(widget: QWidget, scale_factor: float):
+    font = widget.font()
+    if font.pointSizeF() > 0:
+        font.setPointSizeF(font.pointSizeF() * scale_factor)
+        widget.setFont(font)
+
+    # Upravit velikosti pokud jsou nastavené fixně / min / max
+    min_w = widget.minimumWidth()
+    if min_w > 0:
+        widget.setMinimumWidth(int(min_w * scale_factor))
+    min_h = widget.minimumHeight()
+    if min_h > 0:
+        widget.setMinimumHeight(int(min_h * scale_factor))
+
+    max_w = widget.maximumWidth()
+    if max_w > 0 and max_w != 16777215:
+        widget.setMaximumWidth(int(max_w * scale_factor))
+    max_h = widget.maximumHeight()
+    if max_h > 0 and max_h != 16777215:
+        widget.setMaximumHeight(int(max_h * scale_factor))
+
+    # Fixed size
+    if widget.minimumWidth() == widget.maximumWidth() and widget.minimumWidth() > 0:
+        widget.setFixedWidth(int(widget.minimumWidth() * scale_factor))
+    if widget.minimumHeight() == widget.maximumHeight() and widget.minimumHeight() > 0:
+        widget.setFixedHeight(int(widget.minimumHeight() * scale_factor))
+
+    # Rekurzivně projdi děti
+    for child in widget.findChildren(QWidget):
+        scale_widget_fonts_and_sizes(child, scale_factor)
 
 
 class LibraryWindow(QWidget):
@@ -32,6 +66,13 @@ class LibraryWindow(QWidget):
         super().__init__(parent)
         self.setWindowTitle("The King's Player - library")
         self.setWindowState(Qt.WindowState.WindowFullScreen)
+        screen = QApplication.primaryScreen()
+        self.width = screen.size().width()
+
+        if self.width <= 1920:
+            self.setStyleSheet(get_main_stylesheet_fhd())
+        else:
+            self.setStyleSheet(get_main_stylesheet())
 
         self.player_window = player_window
         self.select_mode = False
@@ -60,6 +101,11 @@ class LibraryWindow(QWidget):
 
         self.db = DatabaseManager()
         self.setup_ui()
+        if self.width <= 1920:
+            self.library_paths_list.setMaximumHeight(70)
+            self.grid_layout.setSpacing(8)
+        else:
+            self.grid_layout.setSpacing(12)
         self.setup_connections()
         self.load_films_from_db()
         self.load_library_paths_from_db()
@@ -71,16 +117,23 @@ class LibraryWindow(QWidget):
 
     def setup_ui(self):
         main_layout = QHBoxLayout(self)
-        main_layout.setContentsMargins(12, 12, 12, 12)
-        main_layout.setSpacing(8)
-        self.setStyleSheet(get_main_stylesheet())
+        if self.width <= 1920:
+            main_layout.setContentsMargins(8, 8, 8, 8)
+            main_layout.setSpacing(5)
+        else:
+            main_layout.setContentsMargins(12, 12, 12, 12)
+            main_layout.setSpacing(8)
 
         # Hlavní panel s filtry
         self.filter_panel = QWidget()
         self.filter_panel.setObjectName("filterPanel")
         filter_layout = QVBoxLayout(self.filter_panel)
-        filter_layout.setContentsMargins(10, 15, 10, 15)
-        filter_layout.setSpacing(20)
+        if self.width <= 1920:
+            filter_layout.setContentsMargins(6, 9, 6, 9)
+            filter_layout.setSpacing(10)
+        else:
+            filter_layout.setContentsMargins(10, 15, 10, 15)
+            filter_layout.setSpacing(20)
 
         # Blok 1: Rychlé filtry
         filter_layout.addWidget(QLabel(self.tr("Základní filtry")))
@@ -215,6 +268,14 @@ class LibraryWindow(QWidget):
         # Finální sestavení okna
         main_layout.addWidget(scroll, stretch=5)
         main_layout.addWidget(self.filter_panel, stretch=2)
+
+        filter_scroll = QScrollArea()
+        filter_scroll.setWidgetResizable(True)
+        filter_scroll.setFrameShape(QFrame.Shape.NoFrame)
+        filter_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        filter_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        filter_scroll.setWidget(self.filter_panel)
+        main_layout.addWidget(filter_scroll, stretch=2)
 
     def setup_connections(self):
         self.btn_add_path.clicked.connect(self.add_library_path)
@@ -522,15 +583,20 @@ class LibraryWindow(QWidget):
 
         self.animation_container = AnimatedContainer(self)
         self.animation_container.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.ToolTip)
-        self.animation_container.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
-        self.animation_container.setStyleSheet("""
-            AnimatedContainer {
-                background-color: #2d3950;
-                border-radius: 38px;
-                border: 3px solid #00fff7;
-            }
-        """)
+
         self.animation_container.mouse_left.connect(self._animate_card_out)
+        if self.width <= 1920:
+            radius = 18
+        else:
+            radius = 22
+
+        self.animation_container.setStyleSheet(f"""
+                    AnimatedContainer {{
+                        background-color: #2d3950;
+                        border: 3px solid #00fff7;
+                        border-radius: {radius}px;
+                    }}
+                """)
 
         self.animated_card, interactive_widgets = self.original_card._create_back_widget()
 
@@ -551,7 +617,7 @@ class LibraryWindow(QWidget):
         )
 
         container_layout = QVBoxLayout(self.animation_container)
-        container_layout.setContentsMargins(15, 15, 15, 15)
+        container_layout.setContentsMargins(6, 6, 6, 6)
         container_layout.addWidget(self.animated_card)
 
         self.original_fonts = {

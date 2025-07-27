@@ -8,6 +8,7 @@ from PyQt6.QtWebEngineWidgets import QWebEngineView
 from PyQt6.QtWidgets import QApplication
 
 from player.library.constants import LANGUAGES
+from player.library.styles import get_main_stylesheet_fhd, get_main_stylesheet
 from player.settings_manager import get_setting, init_settings_table
 
 from player.video_player import PlayerWindow
@@ -34,6 +35,16 @@ class InhibitSleep:
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
+    screen = app.primaryScreen()
+    size = screen.size()
+    width = size.width()
+    if width <= 1920:
+        stylesheet = get_main_stylesheet_fhd()
+        print("Nastaven FHD styl")
+    else:
+        stylesheet = get_main_stylesheet()
+
+    app.setStyleSheet(stylesheet)
     saved_lang_code = get_setting("language")
     lang_to_load = None
     if saved_lang_code:

@@ -147,102 +147,102 @@
 <context>
     <name>EditFilmWindow</name>
     <message>
-        <location filename="../player/library/edit_film_window.py" line="26"/>
+        <location filename="../player/library/edit_film_window.py" line="24"/>
         <source>Úprava filmu:</source>
         <translation>Redakti filmon:</translation>
     </message>
     <message>
-        <location filename="../player/library/edit_film_window.py" line="35"/>
+        <location filename="../player/library/edit_film_window.py" line="33"/>
         <source>Nový název:</source>
         <translation>Nova titolo:</translation>
     </message>
     <message>
-        <location filename="../player/library/edit_film_window.py" line="38"/>
+        <location filename="../player/library/edit_film_window.py" line="36"/>
         <source>Rok vydání:</source>
         <translation>Jaro de eldono:</translation>
     </message>
     <message>
-        <location filename="../player/library/edit_film_window.py" line="41"/>
+        <location filename="../player/library/edit_film_window.py" line="39"/>
         <source>Země oddělené čárkou, např. USA, Německo</source>
         <translation>Landoj apartigitaj per komo, ekzemple Usono, Germanio</translation>
     </message>
     <message>
-        <location filename="../player/library/edit_film_window.py" line="42"/>
+        <location filename="../player/library/edit_film_window.py" line="40"/>
         <source>Země původu:</source>
         <translation>Origina lando:</translation>
     </message>
     <message>
-        <location filename="../player/library/edit_film_window.py" line="45"/>
+        <location filename="../player/library/edit_film_window.py" line="43"/>
         <source>Vložte odkaz na trailer (např. z YouTube)</source>
         <translation>Enmeti ligilon al la antaŭvido (ekz. de YouTube)</translation>
     </message>
     <message>
-        <location filename="../player/library/edit_film_window.py" line="46"/>
+        <location filename="../player/library/edit_film_window.py" line="44"/>
         <source>Odkaz na trailer:</source>
         <translation>Ligilo al antaŭvido:</translation>
     </message>
     <message>
-        <location filename="../player/library/edit_film_window.py" line="58"/>
+        <location filename="../player/library/edit_film_window.py" line="56"/>
         <source>Žánry:</source>
         <translation>Ĝenroj:</translation>
     </message>
     <message>
-        <location filename="../player/library/edit_film_window.py" line="65"/>
+        <location filename="../player/library/edit_film_window.py" line="63"/>
         <source>Změnit plakát</source>
         <translation>Ŝanĝi afiŝon</translation>
     </message>
     <message>
-        <location filename="../player/library/edit_film_window.py" line="69"/>
+        <location filename="../player/library/edit_film_window.py" line="67"/>
         <source>Plakát:</source>
         <translation>Afiŝo:</translation>
     </message>
     <message>
-        <location filename="../player/library/edit_film_window.py" line="72"/>
+        <location filename="../player/library/edit_film_window.py" line="70"/>
         <source>Zde napište stručný popis filmu...</source>
         <translation>Jen ĉi tie skribu mallongan priskribon de la filmo...</translation>
     </message>
     <message>
-        <location filename="../player/library/edit_film_window.py" line="74"/>
+        <location filename="../player/library/edit_film_window.py" line="72"/>
         <source>Popis filmu:</source>
         <translation>Priskribo de la filmo:</translation>
     </message>
     <message>
-        <location filename="../player/library/edit_film_window.py" line="81"/>
+        <location filename="../player/library/edit_film_window.py" line="79"/>
         <source>Uložit změny</source>
         <translation>Konservi ŝanĝojn</translation>
     </message>
     <message>
-        <location filename="../player/library/edit_film_window.py" line="82"/>
+        <location filename="../player/library/edit_film_window.py" line="80"/>
         <source>Zrušit</source>
         <translation>Nuligi</translation>
     </message>
     <message>
-        <location filename="../player/library/edit_film_window.py" line="91"/>
+        <location filename="../player/library/edit_film_window.py" line="89"/>
         <source>Vyberte nový plakát</source>
         <translation>Elektu novan afiŝon</translation>
     </message>
     <message>
-        <location filename="../player/library/edit_film_window.py" line="91"/>
+        <location filename="../player/library/edit_film_window.py" line="89"/>
         <source>Obrázky (*.png *.jpg *.jpeg)</source>
         <translation>Bildoj (*.png *.jpg *.jpeg)</translation>
     </message>
     <message>
-        <location filename="../player/library/edit_film_window.py" line="114"/>
+        <location filename="../player/library/edit_film_window.py" line="112"/>
         <source>Soubor s názvem</source>
         <translation>Dosiero nomata</translation>
     </message>
     <message>
-        <location filename="../player/library/edit_film_window.py" line="114"/>
+        <location filename="../player/library/edit_film_window.py" line="112"/>
         <source>již existuje.</source>
         <translation>jam ekzistas.</translation>
     </message>
     <message>
-        <location filename="../player/library/edit_film_window.py" line="118"/>
+        <location filename="../player/library/edit_film_window.py" line="116"/>
         <source>Chyba při přejmenování</source>
         <translation>Eraro dum renomado</translation>
     </message>
     <message>
-        <location filename="../player/library/edit_film_window.py" line="119"/>
+        <location filename="../player/library/edit_film_window.py" line="117"/>
         <source>Nepodařilo se přejmenovat soubor.
 Chyba:</source>
         <translation>Ne eblis renomi la dosieron.
@@ -252,27 +252,27 @@ Eraro:</translation>
 <context>
     <name>FilmCard</name>
     <message>
-        <location filename="../player/library/film_card.py" line="128"/>
+        <location filename="../player/library/film_card.py" line="133"/>
         <source>Přehrát film</source>
         <translation>Ludi filmon</translation>
     </message>
     <message>
-        <location filename="../player/library/film_card.py" line="162"/>
+        <location filename="../player/library/film_card.py" line="167"/>
         <source>Země:</source>
         <translation>Lando:</translation>
     </message>
     <message>
-        <location filename="../player/library/film_card.py" line="178"/>
+        <location filename="../player/library/film_card.py" line="183"/>
         <source>Popis není k dispozici.</source>
         <translation>Priskribo ne disponeblas.</translation>
     </message>
     <message>
-        <location filename="../player/library/film_card.py" line="184"/>
+        <location filename="../player/library/film_card.py" line="189"/>
         <source>Upravit</source>
         <translation>Redakti</translation>
     </message>
     <message>
-        <location filename="../player/library/film_card.py" line="185"/>
+        <location filename="../player/library/film_card.py" line="190"/>
         <source>Smazat</source>
         <translation>Forigi</translation>
     </message>
@@ -368,198 +368,198 @@ Eraro:</translation>
 <context>
     <name>LibraryWindow</name>
     <message>
-        <location filename="../player/library/library_window.py" line="86"/>
+        <location filename="../player/library/library_window.py" line="139"/>
         <source>Základní filtry</source>
         <translation>Bazaj filtriloj</translation>
     </message>
     <message>
-        <location filename="../player/library/library_window.py" line="92"/>
+        <location filename="../player/library/library_window.py" line="145"/>
         <source>Hledat podle názvu...</source>
         <translation>Serĉi laŭ titolo...</translation>
     </message>
     <message>
-        <location filename="../player/library/library_window.py" line="95"/>
+        <location filename="../player/library/library_window.py" line="148"/>
         <source>Minimální hodnocení:</source>
         <translation>Minimuma takso:</translation>
     </message>
     <message>
-        <location filename="../player/library/library_window.py" line="102"/>
+        <location filename="../player/library/library_window.py" line="155"/>
         <source>Pokročilé filtry</source>
         <translation>Progresintaj filtriloj</translation>
     </message>
     <message>
-        <location filename="../player/library/library_window.py" line="110"/>
+        <location filename="../player/library/library_window.py" line="163"/>
         <source>Rok od</source>
         <translation>Jaro de</translation>
     </message>
     <message>
-        <location filename="../player/library/library_window.py" line="112"/>
+        <location filename="../player/library/library_window.py" line="165"/>
         <source>Rok do</source>
         <translation>Jaro ĝis</translation>
     </message>
     <message>
-        <location filename="../player/library/library_window.py" line="119"/>
+        <location filename="../player/library/library_window.py" line="172"/>
         <source>Délka:</source>
         <translation>Daŭro:</translation>
     </message>
     <message>
-        <location filename="../player/library/library_window.py" line="123"/>
+        <location filename="../player/library/library_window.py" line="176"/>
         <source>Do 90 min</source>
         <translation>Ĝis 90 min</translation>
     </message>
     <message>
-        <location filename="../player/library/library_window.py" line="124"/>
+        <location filename="../player/library/library_window.py" line="177"/>
         <source>90-120 min</source>
         <translation>90-120 min</translation>
     </message>
     <message>
-        <location filename="../player/library/library_window.py" line="125"/>
+        <location filename="../player/library/library_window.py" line="178"/>
         <source>Nad 120 min</source>
         <translation>Pli ol 120 min</translation>
     </message>
     <message>
-        <location filename="../player/library/library_window.py" line="134"/>
+        <location filename="../player/library/library_window.py" line="187"/>
         <source>Země původu:</source>
         <translation>Origina lando:</translation>
     </message>
     <message>
-        <location filename="../player/library/library_window.py" line="139"/>
+        <location filename="../player/library/library_window.py" line="192"/>
         <source>Žánry:</source>
         <translation>Ĝenroj:</translation>
     </message>
     <message>
-        <location filename="../player/library/library_window.py" line="153"/>
+        <location filename="../player/library/library_window.py" line="206"/>
         <source>Správa knihovny</source>
         <translation>Administrado de biblioteko</translation>
     </message>
     <message>
-        <location filename="../player/library/library_window.py" line="162"/>
+        <location filename="../player/library/library_window.py" line="215"/>
         <source>Přidat složku</source>
         <translation>Aldoni dosierujon</translation>
     </message>
     <message>
-        <location filename="../player/library/library_window.py" line="163"/>
+        <location filename="../player/library/library_window.py" line="216"/>
         <source>Odebrat</source>
         <translation>Forigi</translation>
     </message>
     <message>
-        <location filename="../player/library/library_window.py" line="168"/>
+        <location filename="../player/library/library_window.py" line="221"/>
         <source>Prohledat knihovnu</source>
         <translation>Serĉi en biblioteko</translation>
     </message>
     <message>
-        <location filename="../player/library/library_window.py" line="174"/>
+        <location filename="../player/library/library_window.py" line="227"/>
         <source>Akce s filmy</source>
         <translation>Agadoj kun filmoj</translation>
     </message>
     <message>
-        <location filename="../player/library/library_window.py" line="179"/>
+        <location filename="../player/library/library_window.py" line="232"/>
         <source>Označit filmy</source>
         <translation>Elekti filmojn</translation>
     </message>
     <message>
-        <location filename="../player/library/library_window.py" line="180"/>
+        <location filename="../player/library/library_window.py" line="233"/>
         <source>Přidat soubory</source>
         <translation>Aldoni dosierojn</translation>
     </message>
     <message>
-        <location filename="../player/library/library_window.py" line="181"/>
+        <location filename="../player/library/library_window.py" line="234"/>
         <source>Nahrát data</source>
         <translation>Alŝuti datumojn</translation>
     </message>
     <message>
-        <location filename="../player/library/library_window.py" line="451"/>
-        <location filename="../player/library/library_window.py" line="182"/>
+        <location filename="../player/library/library_window.py" line="512"/>
+        <location filename="../player/library/library_window.py" line="235"/>
         <source>Odebrat vybrané</source>
         <translation>Forigi elektitajn</translation>
     </message>
     <message>
-        <location filename="../player/library/library_window.py" line="194"/>
+        <location filename="../player/library/library_window.py" line="247"/>
         <source>Připraven</source>
         <translation>Pretas</translation>
     </message>
     <message>
-        <location filename="../player/library/library_window.py" line="199"/>
+        <location filename="../player/library/library_window.py" line="252"/>
         <source>Fullscreen</source>
         <translation>Plenekrane</translation>
     </message>
     <message>
-        <location filename="../player/library/library_window.py" line="200"/>
+        <location filename="../player/library/library_window.py" line="253"/>
         <source>Zpět na přehrávač</source>
         <translation>Reen al la ludilo</translation>
     </message>
     <message>
-        <location filename="../player/library/library_window.py" line="253"/>
+        <location filename="../player/library/library_window.py" line="314"/>
         <source>Všechny filmy jsou aktuální.</source>
         <translation>Ĉiuj filmoj estas ĝisdataj.</translation>
     </message>
     <message>
-        <location filename="../player/library/library_window.py" line="270"/>
+        <location filename="../player/library/library_window.py" line="331"/>
         <source>Spouštím stahování dat...</source>
         <translation>Komencas elŝuton de datumoj...</translation>
     </message>
     <message>
-        <location filename="../player/library/library_window.py" line="395"/>
+        <location filename="../player/library/library_window.py" line="456"/>
         <source>Vyber filmy</source>
         <translation>Elektu filmojn</translation>
     </message>
     <message>
-        <location filename="../player/library/library_window.py" line="396"/>
+        <location filename="../player/library/library_window.py" line="457"/>
         <source>Video soubory</source>
         <translation>Video-dosieroj</translation>
     </message>
     <message>
-        <location filename="../player/library/library_window.py" line="401"/>
+        <location filename="../player/library/library_window.py" line="462"/>
         <source>Skenuji knihovnu, prosím čekejte...</source>
         <translation>Skani la bibliotekon, bonvolu atendi...</translation>
     </message>
     <message>
-        <location filename="../player/library/library_window.py" line="410"/>
+        <location filename="../player/library/library_window.py" line="471"/>
         <source>Prohledávám:</source>
         <translation>Serĉante en:</translation>
     </message>
     <message>
-        <location filename="../player/library/library_window.py" line="421"/>
+        <location filename="../player/library/library_window.py" line="482"/>
         <source>Skenování dokončeno.</source>
         <translation>Skani finiĝis.</translation>
     </message>
     <message>
-        <location filename="../player/library/library_window.py" line="432"/>
+        <location filename="../player/library/library_window.py" line="493"/>
         <source>Mažu...</source>
         <translation>Forigas...</translation>
     </message>
     <message>
-        <location filename="../player/library/library_window.py" line="461"/>
+        <location filename="../player/library/library_window.py" line="522"/>
         <source>Vyber složku pro knihovnu</source>
         <translation>Elektu dosierujon por la biblioteko</translation>
     </message>
     <message>
-        <location filename="../player/library/library_window.py" line="664"/>
+        <location filename="../player/library/library_window.py" line="730"/>
         <source>Tento soubor</source>
         <translation>Ĉi tiu dosiero</translation>
     </message>
     <message>
-        <location filename="../player/library/library_window.py" line="670"/>
+        <location filename="../player/library/library_window.py" line="736"/>
         <source>Potvrdit smazání</source>
         <translation>Konfirmi forigon</translation>
     </message>
     <message>
-        <location filename="../player/library/library_window.py" line="671"/>
+        <location filename="../player/library/library_window.py" line="737"/>
         <source>Opravdu si přejete trvale smazat film</source>
         <translation>Ĉu vi vere volas permanente forigi la filmon</translation>
     </message>
     <message>
-        <location filename="../player/library/library_window.py" line="672"/>
-        <source>Tata akce je nevratná.</source>
-        <translation>Ĉi tiu ago ne estas reversa.</translation>
+        <location filename="../player/library/library_window.py" line="738"/>
+        <source>Tato akce je nevratná.</source>
+        <translation>Tiu ago estas nerevokebla.</translation>
     </message>
     <message>
-        <location filename="../player/library/library_window.py" line="726"/>
+        <location filename="../player/library/library_window.py" line="792"/>
         <source>Stahuji</source>
         <translation>Elŝutante</translation>
     </message>
     <message>
-        <location filename="../player/library/library_window.py" line="731"/>
+        <location filename="../player/library/library_window.py" line="797"/>
         <source>Stahování dokončeno.</source>
         <translation>Elŝuto kompletigita.</translation>
     </message>
@@ -567,86 +567,124 @@ Eraro:</translation>
 <context>
     <name>PlaylistWindow</name>
     <message>
-        <location filename="../player/playlist.py" line="98"/>
+        <location filename="../player/playlist.py" line="51"/>
         <source>Playlisty</source>
         <translation>Ludlistoj</translation>
     </message>
     <message>
-        <location filename="../player/playlist.py" line="185"/>
-        <location filename="../player/playlist.py" line="111"/>
+        <location filename="../player/playlist.py" line="138"/>
+        <location filename="../player/playlist.py" line="64"/>
         <source>Nový playlist</source>
         <translation>Nova ludlisto</translation>
     </message>
     <message>
-        <location filename="../player/playlist.py" line="112"/>
+        <location filename="../player/playlist.py" line="65"/>
         <source>Smazat playlist</source>
         <translation>Forigi ludliston</translation>
     </message>
     <message>
-        <location filename="../player/playlist.py" line="226"/>
-        <location filename="../player/playlist.py" line="113"/>
+        <location filename="../player/playlist.py" line="179"/>
+        <location filename="../player/playlist.py" line="66"/>
         <source>Přejmenovat</source>
         <translation>Renomi</translation>
     </message>
     <message>
-        <location filename="../player/playlist.py" line="114"/>
+        <location filename="../player/playlist.py" line="67"/>
         <source>Playlisty:</source>
         <translation>Ludlistoj:</translation>
     </message>
     <message>
-        <location filename="../player/playlist.py" line="132"/>
+        <location filename="../player/playlist.py" line="85"/>
         <source>Přidat film</source>
         <translation>Aldoni filmon</translation>
     </message>
     <message>
-        <location filename="../player/playlist.py" line="133"/>
+        <location filename="../player/playlist.py" line="86"/>
         <source>Smazat film</source>
         <translation>Forigi filmon</translation>
     </message>
     <message>
-        <location filename="../player/playlist.py" line="134"/>
+        <location filename="../player/playlist.py" line="87"/>
         <source>Filmy v playlistu:</source>
         <translation>Filmoj en la ludlisto:</translation>
     </message>
     <message>
-        <location filename="../player/playlist.py" line="185"/>
+        <location filename="../player/playlist.py" line="138"/>
         <source>Zadej název:</source>
         <translation>Enmetu titolon:</translation>
     </message>
     <message>
-        <location filename="../player/playlist.py" line="330"/>
-        <location filename="../player/playlist.py" line="240"/>
-        <location filename="../player/playlist.py" line="230"/>
-        <location filename="../player/playlist.py" line="205"/>
-        <location filename="../player/playlist.py" line="189"/>
+        <location filename="../player/playlist.py" line="283"/>
+        <location filename="../player/playlist.py" line="193"/>
+        <location filename="../player/playlist.py" line="183"/>
+        <location filename="../player/playlist.py" line="158"/>
+        <location filename="../player/playlist.py" line="142"/>
         <source>Chyba</source>
         <translation>Eraro</translation>
     </message>
     <message>
-        <location filename="../player/playlist.py" line="230"/>
-        <location filename="../player/playlist.py" line="189"/>
+        <location filename="../player/playlist.py" line="183"/>
+        <location filename="../player/playlist.py" line="142"/>
         <source>Název &apos;Default&apos; je rezervovaný a nelze ho použít.</source>
         <translation>La nomo &apos;Default&apos; estas rezervita kaj ne povas esti uzata.</translation>
     </message>
     <message>
-        <location filename="../player/playlist.py" line="226"/>
+        <location filename="../player/playlist.py" line="179"/>
         <source>Nový název:</source>
         <translation>Nova nomo:</translation>
     </message>
     <message>
-        <location filename="../player/playlist.py" line="273"/>
+        <location filename="../player/playlist.py" line="226"/>
         <source>Přidat filmy</source>
         <translation>Aldoni filmojn</translation>
     </message>
     <message>
-        <location filename="../player/playlist.py" line="273"/>
+        <location filename="../player/playlist.py" line="226"/>
         <source>Videa (*.mp4 *.avi *.mkv)</source>
         <translation>Videoj (*.mp4 *.avi *.mkv)</translation>
     </message>
     <message>
-        <location filename="../player/playlist.py" line="330"/>
+        <location filename="../player/playlist.py" line="283"/>
         <source>Není vybrán žádný playlist.</source>
         <translation>Neniu ludlisto elektita.</translation>
+    </message>
+</context>
+<context>
+    <name>SettingsWindow</name>
+    <message>
+        <location filename="../player/settings_window.py" line="21"/>
+        <source>Nastavení</source>
+        <translation>Agordoj</translation>
+    </message>
+    <message>
+        <location filename="../player/settings_window.py" line="32"/>
+        <source>Výběr jazyka:</source>
+        <translation>Elekto de lingvo:</translation>
+    </message>
+    <message>
+        <location filename="../player/settings_window.py" line="47"/>
+        <source>Jazyk aplikace:</source>
+        <translation>Lingvo de la aplikaĵo:</translation>
+    </message>
+    <message>
+        <location filename="../player/settings_window.py" line="54"/>
+        <source>Uložit a restartovat</source>
+        <translation>Konservi kaj rekomenci</translation>
+    </message>
+    <message>
+        <location filename="../player/settings_window.py" line="55"/>
+        <source>Zrušit</source>
+        <translation>Nuligi</translation>
+    </message>
+    <message>
+        <location filename="../player/settings_window.py" line="66"/>
+        <source>Restart vyžadován</source>
+        <translation>Rekomenco necesa</translation>
+    </message>
+    <message>
+        <location filename="../player/settings_window.py" line="67"/>
+        <source>Změna jazyka se projeví po restartu aplikace.</source>
+        <translation>La lingvoŝanĝo efektiviĝos post rekomenco de la aplikaĵo.</translation>
     </message>
 </context>
 <context>

@@ -1,27 +1,45 @@
 # settings_window.py
-from PyQt6.QtWidgets import QDialog, QVBoxLayout, QFormLayout, QComboBox, QPushButton, QMessageBox, QHBoxLayout
+import os
+import sys
+
+from PyQt6.QtWidgets import QDialog, QVBoxLayout, QFormLayout, QComboBox, QPushButton, QMessageBox, QHBoxLayout, QLabel
 from PyQt6.QtGui import QIcon
 
 from .library.constants import LANG_METADATA
+from .library.styles import get_settings_stylesheet
 from .settings_manager import get_setting, set_setting
+
+
+def restart_app():
+    python = sys.executable
+    os.execl(python, python, *sys.argv)
 
 class SettingsWindow(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setObjectName("settingsDialog")
         self.setWindowTitle(self.tr("Nastavení"))
-        self.setMinimumWidth(400)
+        self.setMinimumWidth(420)
+
+        # ÚPRAVA: nový styl
+        self.setStyleSheet(get_settings_stylesheet())
 
         main_layout = QVBoxLayout(self)
+        main_layout.setContentsMargins(30, 30, 30, 30)
         form_layout = QFormLayout()
 
         # --- Výběr jazyka ---
+        lbl = QLabel(self.tr("Výběr jazyka:"))
+        lbl.setObjectName("formLabel")
+        main_layout.addWidget(lbl)
+
         self.lang_combo = QComboBox()
+        self.lang_combo.setObjectName("langComboBox")
         for code, data in LANG_METADATA.items():
             self.lang_combo.addItem(QIcon(data['icon']), data['native_name'], code)
 
         # Načteme a nastavíme aktuálně zvolený jazyk
-        current_lang = get_setting("language", "cs") # Výchozí je 'cs'
+        current_lang = get_setting("language", "cs")
         index = self.lang_combo.findData(current_lang)
         if index != -1:
             self.lang_combo.setCurrentIndex(index)
@@ -45,7 +63,7 @@ class SettingsWindow(QDialog):
     def save_and_close(self):
         selected_lang_code = self.lang_combo.currentData()
         set_setting("language", selected_lang_code)
-
         QMessageBox.information(self, self.tr("Restart vyžadován"),
                                 self.tr("Změna jazyka se projeví po restartu aplikace."))
         self.accept()
+        restart_app()
