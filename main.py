@@ -2,7 +2,8 @@ import locale
 import os
 import sys
 
-import dbus
+import PyQt6.sip
+import subprocess
 from PyQt6.QtCore import Qt, QTranslator
 from PyQt6.QtWebEngineWidgets import QWebEngineView
 from PyQt6.QtWidgets import QApplication
@@ -12,6 +13,7 @@ from player.library.styles import get_main_stylesheet_fhd, get_main_stylesheet
 from player.settings_manager import get_setting, init_settings_table
 
 from player.video_player import PlayerWindow
+from player.utils import resource_path
 
 os.environ['QTWEBENGINE_CHROMIUM_FLAGS'] = '--use-gl=disabled'
 
@@ -21,30 +23,20 @@ def preheat_chromium():
     dummy.hide()
     dummy.deleteLater()
 
-class InhibitSleep:
-    def __init__(self, appname="MacaTheKingPlayer"):
-        self.bus = dbus.SessionBus()
-        self.screensaver = self.bus.get_object("org.freedesktop.ScreenSaver", "/org/freedesktop/ScreenSaver")
-        self.cookie = self.screensaver.Inhibit(appname, "Přehrávání filmu!", dbus_interface="org.freedesktop.ScreenSaver")
-
-    def __del__(self):
-        try:
-            self.screensaver.UnInhibit(self.cookie, dbus_interface="org.freedesktop.ScreenSaver")
-        except Exception:
-            pass
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     screen = app.primaryScreen()
     size = screen.size()
     width = size.width()
+
     if width <= 1920:
-        stylesheet = get_main_stylesheet_fhd()
+        stylesheet_template = get_main_stylesheet_fhd()
         print("Nastaven FHD styl")
     else:
-        stylesheet = get_main_stylesheet()
+        stylesheet_template = get_main_stylesheet()
 
-    app.setStyleSheet(stylesheet)
+    app.setStyleSheet(stylesheet_template)
     saved_lang_code = get_setting("language")
     lang_to_load = None
     if saved_lang_code:
@@ -59,9 +51,9 @@ if __name__ == '__main__':
             pass
 
     translator = QTranslator()
-    if lang_to_load and lang_to_load != "cs":  # Čeština je výchozí
+    if lang_to_load and lang_to_load != "cs":
         filename = LANGUAGES[lang_to_load]
-        path = f"translations/{filename}.qm"
+        path = resource_path(f"translations/{filename}.qm")
         if translator.load(path):
             app.installTranslator(translator)
             print(f"Překlad '{filename}.qm' úspěšně NAČTEN.")
@@ -69,10 +61,10 @@ if __name__ == '__main__':
             print(f"CHYBA: Překlad '{filename}.qm' se nepodařilo načíst.")
     else:
         print("Používá se výchozí jazyk (čeština).")
+
     preheat_chromium()
     app.setStyle("Fusion")
     player_window = PlayerWindow()
     init_settings_table()
-    sleep_inhibitor = InhibitSleep()
     player_window.show()
     sys.exit(app.exec())

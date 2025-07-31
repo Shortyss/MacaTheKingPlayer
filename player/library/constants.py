@@ -1,21 +1,19 @@
+from player.utils import resource_path
+
 ALL_GENRES = (
     "Akční", "Dobrodružný", "Komedie", "Drama", "Fantasy", "Horor",
     "Sci-Fi", "Thriller", "Mysteriózní", "Romantický", "Animovaný",
     "Rodinný", "Krimi", "Válečný", "Historický", "Hudební", "Western"
 )
 
-PLACEHOLDER_POSTER = "assets/icons/KingPlayer6.png"
+def get_placeholder_poster():
+    return resource_path("assets/icons/KingPlayer6.png")
+
 SUPPORTED_EXTS = ('.mp4', '.mkv', '.avi', '.mov', '.wmv', '.flv', '.webm', '.mpg', '.mpeg')
 
-
 def _for_translator_tool_only():
-    """
-    Tato funkce se NIKDY NEVOLÁ.
-    Její jediný účel je, aby nástroj pylupdate6 našel všechny tyto texty.
-    """
     from PyQt6.QtCore import QCoreApplication
 
-    # Používáme plný název, aby to pylupdate6 našel
     QCoreApplication.translate("Genres", "Akční")
     QCoreApplication.translate("Genres", "Dobrodružný")
     QCoreApplication.translate("Genres", "Komedie")
@@ -49,7 +47,6 @@ LANG_METADATA = {
     "tlh": {"native_name": "tlhIngan Hol", "icon": "assets/flags/kli.png"}
 }
 
-# Slovník pro načítání správných .qm souborů v main.py
 LANGUAGES = {
     "en": "english",
     "de": "german",

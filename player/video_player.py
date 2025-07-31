@@ -8,6 +8,8 @@ from PyQt6.QtCore import (
     QUrl, QTimer, Qt, QSizeF, QPointF,
     QPropertyAnimation, QEasingCurve, QEvent, QSize
 )
+from .utils import InhibitSleep
+from player.utils import resource_path
 
 from .donate_window import DonateOverlay
 from .info_overlay import InfoOverlay
@@ -23,8 +25,10 @@ class PlayerWindow(QWidget):
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.setFocus()
 
+        self.sleep_inhibitor = InhibitSleep(self)
+
         self.setWindowTitle("The King's Player by Shortyss")
-        self.setWindowIcon(QIcon("assets/icons/KingPlayer6.png"))
+        self.setWindowIcon(QIcon(resource_path("assets/icons/KingPlayer6.png")))
         self.resize(1280, 720)
         self.setStyleSheet("background-color:black;")
         # media
@@ -357,8 +361,16 @@ class PlayerWindow(QWidget):
     def add_file_to_default_playlist(self, file_path: str):
         with get_connection() as con:
             cur = con.cursor()
+
+            cur.execute("INSERT OR IGNORE INTO playlists (name) VALUES ('_DEFAULT_')")
+            con.commit()
+
             cur.execute("SELECT id FROM playlists WHERE name = '_DEFAULT_'")
-            playlist_id = cur.fetchone()[0]
+            result = cur.fetchone()
+            if not result:
+                print("KRITICKÁ CHYBA: Nepodařilo se vytvořit defaultní playlist.")
+                return None, -1
+            playlist_id = result[0]
 
             cur.execute("SELECT COALESCE(MAX(position), 0) FROM playlist_items WHERE playlist_id=?", (playlist_id,))
             pos = cur.fetchone()[0] + 1
@@ -371,7 +383,6 @@ class PlayerWindow(QWidget):
             new_index = updated_playlist.index(file_path)
 
             return updated_playlist, new_index
-
     def next_movie(self):
         if self.current_playlist and 0 <= self.current_index + 1 < len(self.current_playlist):
             self.current_index += 1
@@ -422,6 +433,7 @@ class PlayerWindow(QWidget):
         print("Ovládání efektů - zatím sci-fi.")
 
     def closeEvent(self, event):
+        self.sleep_inhibitor.stop()
         cleanup_default_playlist()
         if hasattr(self, "playlist_window") and self.playlist_window:
             self.playlist_window.close()
@@ -435,7 +447,6 @@ class PlayerWindow(QWidget):
 
         if not self.view.viewport().underMouse() or not self.isActiveWindow():
             return
-        QCursor.setPos(self.mapToGlobal(self.rect().center()))
         self.setCursor(Qt.CursorShape.BlankCursor)
         self.view.setCursor(Qt.CursorShape.BlankCursor)
         self.view.viewport().setCursor(Qt.CursorShape.BlankCursor)

@@ -11,13 +11,12 @@ from PyQt6.QtWidgets import (
     QGridLayout, QScrollArea, QFileDialog, QListWidget, QApplication, QFrame,
      QMessageBox
 )
-from PyQt6.QtGui import  QFont
 
 from player.library.api_key_dialog import ApiKeyDialog
 from player.library.edit_film_window import EditFilmWindow
 from player.library.flow_layout import FlowLayout
 
-from .constants import ALL_GENRES, PLACEHOLDER_POSTER, SUPPORTED_EXTS
+from .constants import ALL_GENRES, get_placeholder_poster, SUPPORTED_EXTS
 from .custom_widgets import (
     AnimatedContainer, TagButton, ClickableStarFilter
 )
@@ -35,7 +34,6 @@ def scale_widget_fonts_and_sizes(widget: QWidget, scale_factor: float):
         font.setPointSizeF(font.pointSizeF() * scale_factor)
         widget.setFont(font)
 
-    # Upravit velikosti pokud jsou nastavené fixně / min / max
     min_w = widget.minimumWidth()
     if min_w > 0:
         widget.setMinimumWidth(int(min_w * scale_factor))
@@ -373,10 +371,9 @@ class LibraryWindow(QWidget):
 
         selected_countries = {btn.text() for btn in self.country_buttons if btn.isChecked()}
 
-        # Zjistíme aktivní žánry PŘED cyklem
         selected_genres = {genre for genre, button in self.genre_buttons.items() if button.isActive()}
 
-        # Filtrujeme filmy
+        # Filtrování filmů
         filtered_films = []
         for film_data in self.all_films:
             title_ok = not title_text or title_text in film_data.get('title', '').lower()
@@ -412,7 +409,7 @@ class LibraryWindow(QWidget):
             if title_ok and rating_ok and year_ok and genre_ok and length_ok and country_ok:
                 filtered_films.append(film_data)
 
-        # Aktualizujeme UI
+        # Aktualizace UI
         filtered_films.sort(key=lambda film: film.get('title', '').lower())
         self.films = filtered_films
         num_needed = len(self.films)
@@ -446,7 +443,7 @@ class LibraryWindow(QWidget):
         for f in film_list:
             if f not in current_filepaths:
                 film_data = {"title": os.path.splitext(os.path.basename(f))[0], "year": "", "rating": 0,
-                             "poster": PLACEHOLDER_POSTER, "filepath": f}
+                             "poster": get_placeholder_poster(), "filepath": f}
                 self.db.add_or_update_film(film_data)
                 new_films_added = True
         if new_films_added:
@@ -454,7 +451,8 @@ class LibraryWindow(QWidget):
 
     def add_selected_files(self):
         filepaths, _ = QFileDialog.getOpenFileNames(self, self.tr("Vyber filmy"), os.path.expanduser("~"),
-                                                    f"{self.tr('Video soubory')} ({' '.join(['*' + ext for ext in SUPPORTED_EXTS])})")
+                                                    f"{self.tr('Video soubory')} ({' '.join(['*' + ext for ext in SUPPORTED_EXTS])})",
+                                                    options=QFileDialog.Option.DontUseNativeDialog)
         if filepaths:
             self.add_films_to_library(filepaths)
 
@@ -731,7 +729,6 @@ class LibraryWindow(QWidget):
         if not filepath:
             return
 
-        # Vytvoření potvrzovacího dialogu
         msg_box = QMessageBox(self)
         msg_box.setWindowTitle(self.tr("Potvrdit smazání"))
         msg_box.setText(f"{self.tr('Opravdu si přejete trvale smazat film')}\n{title}?")

@@ -1,6 +1,6 @@
+
 def get_main_stylesheet():
     return """
-    /* -------- ZÁKLADNÍ VZHLED PRO CELOU APPKU -------- */
     QWidget { 
         background: rgba(34, 43, 66, 230); 
         color: #eafff7; 
@@ -87,7 +87,6 @@ def get_main_stylesheet():
         border: 1.8px solid #22ffc6; 
         color: #000000; 
     }
-    /* Playlist a speciální tlačítka mají vlastní gradient – viz níže */
 
     /* --------- FILMOVÁ KARTA (FILMCARD) --------- */
     QFrame#FilmCard {
@@ -121,7 +120,6 @@ def get_main_stylesheet():
 
 def get_playlist_stylesheet():
     return """
-    /* ---- SPECIÁLNÍ STYLY PRO PLAYLIST WINDOW ---- */
     QWidget {
         background: rgba(34, 43, 66, 100); 
         border-radius: 20px;
@@ -421,8 +419,6 @@ def get_main_stylesheet_fhd():
     }
     #titleLabel { color: #fff; font-size: 14px; font-weight: 600; }
     #yearLabel { color: #a9b8d4; font-size: 12px; }
-
-    /* --- Playlist window, info overlay, atd. můžeš přenést obdobně pokud potřebuješ --- */
     """
 
 
@@ -433,7 +429,6 @@ def get_settings_stylesheet():
         padding: 30px 32px 25px 32px;
     }
 
-    /* Roletka s jazyky */
     QComboBox {
         background: #2d3950;
         color: #eafff7;
@@ -465,7 +460,6 @@ def get_settings_stylesheet():
         height: 20px;
     }
 
-    /* Vzhled rozbaleného seznamu */
     QComboBox QAbstractItemView {
         background: #2d3950;
         color: #eafff7;
@@ -475,14 +469,12 @@ def get_settings_stylesheet():
         outline: 0px;
     }
 
-    /* Zvýraznění vybrané (kliknuté) položky */
     QComboBox QAbstractItemView::item:selected {
         background-color: #16e0ec;
         color: #000;
         border-radius: 4px;
     }
 
-    /* Zbytek kódu beze změny */
     QPushButton {
         background: qradialgradient(cx:0.5, cy:0.5, radius:0.8, stop:0 #283950, stop:1 #2d3950);
         border-radius: 13px;

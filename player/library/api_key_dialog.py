@@ -1,7 +1,7 @@
 from PyQt6.QtWidgets import (
     QDialog, QVBoxLayout, QLabel, QLineEdit, QDialogButtonBox
 )
-from PyQt6.QtCore import Qt
+
 
 class ApiKeyDialog(QDialog):
     def __init__(self, parent=None):
@@ -24,7 +24,6 @@ class ApiKeyDialog(QDialog):
         self.api_key_input.setPlaceholderText(self.tr("Vložte Váš API klíč..."))
         layout.addWidget(self.api_key_input)
 
-        # Tlačítka OK a Zrušit
         self.button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
         self.button_box.accepted.connect(self.accept)
         self.button_box.rejected.connect(self.reject)

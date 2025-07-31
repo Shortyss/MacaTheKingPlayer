@@ -5,6 +5,7 @@ from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QLineEdit,
     QFormLayout, QMessageBox, QTextEdit, QFileDialog
 )
+from player.utils import resource_path
 
 from .constants import ALL_GENRES
 from .custom_widgets import TagButton
@@ -15,7 +16,6 @@ class EditFilmWindow(QWidget):
 
     def __init__(self, film_data, db_manager, parent=None):
         super().__init__(parent)
-        # LOKÁLNÍ STYL SMAZÁN
         self.film_data = film_data
         self.db = db_manager
         self.new_poster_path = self.film_data.get('poster')
@@ -86,7 +86,9 @@ class EditFilmWindow(QWidget):
         self.btn_save.clicked.connect(self.save_changes)
 
     def change_poster(self):
-        filepath, _ = QFileDialog.getOpenFileName(self, self.tr("Vyberte nový plakát"), "", self.tr("Obrázky (*.png *.jpg *.jpeg)"))
+        filepath, _ = QFileDialog.getOpenFileName(self, self.tr("Vyberte nový plakát"), "",
+                                                  self.tr("Obrázky (*.png *.jpg *.jpeg)"),
+                                                  options=QFileDialog.Option.DontUseNativeDialog)
         if filepath:
             self.new_poster_path = filepath
             self.update_poster_preview(filepath)
@@ -112,9 +114,10 @@ class EditFilmWindow(QWidget):
                     raise FileExistsError(f"{self.tr('Soubor s názvem')}'{new_title}{extension}' {self.tr('již existuje.')}")
                 os.rename(old_filepath, new_filepath)
             except (OSError, FileExistsError) as e:
+                error_text = self.tr('Nepodařilo se přejmenovat soubor.\nChyba:')
                 QMessageBox.critical(self,
                                      self.tr("Chyba při přejmenování"),
-                                     f"{self.tr('Nepodařilo se přejmenovat soubor.\nChyba:')} {e}"
+                                     f"{error_text} {e}"
                                      )
                 return
 
@@ -127,12 +130,10 @@ class EditFilmWindow(QWidget):
         new_data['poster'] = self.new_poster_path
         new_data['country'] = self.country_edit.text().strip()
         new_data['trailer_url'] = self.trailer_edit.text().strip()
-
-        # Sběr žánrů
         selected_genres = [button.text() for button in self.genre_buttons if button.isChecked()]
         new_data['genres'] = ', '.join(selected_genres)
 
-        # Uložíme do DB
+        # Uložení do DB
         self.db.add_or_update_film(new_data)
         self.film_updated.emit(self.film_data, new_data)
         self.close()

@@ -3,8 +3,11 @@ from PyQt6.QtWidgets import (QHBoxLayout, QVBoxLayout, QListWidget, QStackedWidg
 from PyQt6.QtGui import QPixmap, QIcon
 from PyQt6.QtCore import Qt, QUrl
 from PyQt6.QtGui import QDesktopServices
+import webbrowser
 
 from player.library.styles import get_main_stylesheet
+from player.utils import resource_path
+from player.utils import open_url_safely
 
 
 class DonateOverlay(QFrame):
@@ -59,7 +62,7 @@ class DonateOverlay(QFrame):
         layout.addWidget(QLabel(self.tr("Nejjednodušší způsob pro podporu v českých korunách.")))
 
         qr_label = QLabel()
-        qr_pixmap = QPixmap("assets/donations/czk_qr.png")
+        qr_pixmap = QPixmap(resource_path("assets/donations/czk_qr.png"))
         qr_label.setPixmap(qr_pixmap.scaled(200, 200, Qt.AspectRatioMode.KeepAspectRatio))
         qr_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(qr_label, 1)
@@ -67,7 +70,7 @@ class DonateOverlay(QFrame):
         acc_layout = QHBoxLayout()
         self.czk_account_input = QLineEdit("188724691/0800")
         self.czk_account_input.setReadOnly(True)
-        copy_btn = QPushButton(QIcon("assets/icons/copy.svg"), "")
+        copy_btn = QPushButton(QIcon(resource_path("assets/icons/copy.svg")), "")
         copy_btn.setToolTip(self.tr("Kopírovat číslo účtu"))
         copy_btn.clicked.connect(lambda: QApplication.clipboard().setText(self.czk_account_input.text()))
         acc_layout.addWidget(self.czk_account_input)
@@ -115,6 +118,6 @@ class DonateOverlay(QFrame):
         layout.addWidget(label)
 
         button = QPushButton(self.tr("Přejít na Buy Me a Coffee"))
-        button.clicked.connect(lambda: QDesktopServices.openUrl(QUrl(bmac_link)))
+        button.clicked.connect(lambda: open_url_safely(bmac_link))
         layout.addWidget(button)
         return page

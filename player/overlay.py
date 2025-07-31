@@ -4,6 +4,7 @@ from PyQt6.QtCore import pyqtSignal, Qt, QSize
 from PyQt6.QtMultimedia import QMediaPlayer
 
 from player.library.styles import get_overlay_stylesheet
+from player.utils import resource_path
 
 
 class ClickableSlider(QSlider):
@@ -47,21 +48,21 @@ class ControlOverlay(QWidget):
         self.bg_panel.setObjectName("OverlayPanel")
 
         # Ovládací prvky
-        self.play_icon = QIcon("assets/icons/play.svg")
-        self.pause_icon = QIcon("assets/icons/pause.svg")
-        self.stop_icon = QIcon("assets/icons/stop.svg")
-        self.prev_icon = QIcon("assets/icons/prev.svg")
-        self.next_icon = QIcon("assets/icons/next.svg")
-        self.back10_icon = QIcon("assets/icons/back10.svg")
-        self.forward10_icon = QIcon("assets/icons/forward10.svg")
-        self.fullscreen_icon = QIcon("assets/icons/fullscreen.svg")
-        self.playlist_icon = QIcon("assets/icons/playlist1.svg")
-        self.library_icon = QIcon("assets/icons/home2.svg")
-        self.settings_icon = QIcon("assets/icons/settings.svg")
-        self.effects_icon = QIcon("assets/icons/effects.png")
-        self.donate_icon = QIcon("assets/icons/donate1.png")
-        self.mute_icon = QIcon("assets/icons/mute.svg")
-        self.unmute_icon = QIcon("assets/icons/unmute.svg")
+        self.play_icon = QIcon(resource_path("assets/icons/play.svg"))
+        self.pause_icon = QIcon(resource_path("assets/icons/pause.svg"))
+        self.stop_icon = QIcon(resource_path("assets/icons/stop.svg"))
+        self.prev_icon = QIcon(resource_path("assets/icons/prev.svg"))
+        self.next_icon = QIcon(resource_path("assets/icons/next.svg"))
+        self.back10_icon = QIcon(resource_path("assets/icons/back10.svg"))
+        self.forward10_icon = QIcon(resource_path("assets/icons/forward10.svg"))
+        self.fullscreen_icon = QIcon(resource_path("assets/icons/fullscreen.svg"))
+        self.playlist_icon = QIcon(resource_path("assets/icons/playlist1.svg"))
+        self.library_icon = QIcon(resource_path("assets/icons/home2.svg"))
+        self.settings_icon = QIcon(resource_path("assets/icons/settings.svg"))
+        self.effects_icon = QIcon(resource_path("assets/icons/effects.png"))
+        self.donate_icon = QIcon(resource_path("assets/icons/donate1.png"))
+        self.mute_icon = QIcon(resource_path("assets/icons/mute.svg"))
+        self.unmute_icon = QIcon(resource_path("assets/icons/unmute.svg"))
 
         # Ovládací tlačítka
         self.prev_button = QPushButton(self.bg_panel)
@@ -148,7 +149,7 @@ class ControlOverlay(QWidget):
         self.volume_slider.setValue(50)
         self.volume_slider.setFixedWidth(90)
 
-        # --- Layout ---
+        # Layout
         seek_layout = QHBoxLayout()
         seek_layout.setSpacing(12)
         self.time_label = QLabel("00:00", self.bg_panel)

@@ -1,7 +1,7 @@
 
 import locale
 import subprocess
-
+from pathlib import Path
 import requests
 from tmdbv3api import TMDb, Movie, Search
 import os
@@ -85,21 +85,29 @@ def download_poster_and_get_path(poster_url, film_filepath):
         return None
 
     try:
+        app_data_dir = Path.home() / ".local" / "share" / "KingPlayer" / "posters"
+
+        app_data_dir.mkdir(parents=True, exist_ok=True)
+
+        base_name = Path(film_filepath).stem
+        local_filename = f"{base_name}.jpg"
+        local_path = app_data_dir / local_filename
+
         response = requests.get(poster_url, stream=True)
         response.raise_for_status()
-
-        base_name = os.path.splitext(os.path.basename(film_filepath))[0]
-        local_filename = f"{base_name}.jpg"
-        local_path = os.path.join("assets", "posters", local_filename)
 
         with open(local_path, 'wb') as f:
             for chunk in response.iter_content(chunk_size=8192):
                 f.write(chunk)
-        return local_path
+
+        return str(local_path)
 
     except requests.exceptions.RequestException as e:
+        print(f"CHYBA: Nepodařilo se stáhnout plakát: {e}")
         return None
-
+    except Exception as e:
+        print(f"CHYBA: Nepodařilo se uložit plakát: {e}")
+        return None
 
 def get_stream_url(youtube_url):
     if not youtube_url:

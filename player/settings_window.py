@@ -1,4 +1,3 @@
-# settings_window.py
 import os
 import sys
 
@@ -8,6 +7,7 @@ from PyQt6.QtGui import QIcon
 from .library.constants import LANG_METADATA
 from .library.styles import get_settings_stylesheet
 from .settings_manager import get_setting, set_setting
+from .utils import resource_path
 
 
 def restart_app():
@@ -21,14 +21,13 @@ class SettingsWindow(QDialog):
         self.setWindowTitle(self.tr("Nastavení"))
         self.setMinimumWidth(420)
 
-        # ÚPRAVA: nový styl
         self.setStyleSheet(get_settings_stylesheet())
 
         main_layout = QVBoxLayout(self)
         main_layout.setContentsMargins(30, 30, 30, 30)
         form_layout = QFormLayout()
 
-        # --- Výběr jazyka ---
+        # Výběr jazyka
         lbl = QLabel(self.tr("Výběr jazyka:"))
         lbl.setObjectName("formLabel")
         main_layout.addWidget(lbl)
@@ -36,7 +35,8 @@ class SettingsWindow(QDialog):
         self.lang_combo = QComboBox()
         self.lang_combo.setObjectName("langComboBox")
         for code, data in LANG_METADATA.items():
-            self.lang_combo.addItem(QIcon(data['icon']), data['native_name'], code)
+            icon_path = resource_path(data['icon'])
+            self.lang_combo.addItem(QIcon(icon_path), data['native_name'], code)
 
         # Načteme a nastavíme aktuálně zvolený jazyk
         current_lang = get_setting("language", "cs")
@@ -48,7 +48,7 @@ class SettingsWindow(QDialog):
         main_layout.addLayout(form_layout)
         main_layout.addStretch()
 
-        # --- Tlačítka Uložit / Zrušit ---
+        # Tlačítka Uložit / Zrušit
         button_layout = QHBoxLayout()
         button_layout.addStretch()
         self.btn_save = QPushButton(self.tr("Uložit a restartovat"))

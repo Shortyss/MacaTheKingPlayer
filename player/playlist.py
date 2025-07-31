@@ -10,6 +10,7 @@ from PyQt6.QtCore import Qt, QPoint
 
 from player.library.styles import get_playlist_stylesheet
 from player.settings_manager import get_connection, set_setting, get_setting
+from player.utils import resource_path
 
 
 class FilmListWidget(QListWidget):
@@ -49,7 +50,7 @@ class PlaylistWindow(QWidget):
         self.setAcceptDrops(True)
         self.setEnabled(True)
         self.setWindowTitle(self.tr("Playlisty"))
-        self.setWindowIcon(QIcon("assets/icons/KingPlayer6.png"))
+        self.setWindowIcon(QIcon(resource_path("assets/icons/KingPlayer6.png")))
         self.resize(420, 480)
         self.dock_offset = QPoint(0, 0)
         self.player_callback = player_callback

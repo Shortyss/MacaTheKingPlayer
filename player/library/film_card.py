@@ -6,7 +6,8 @@ from PyQt6.QtWebEngineWidgets import QWebEngineView
 from PyQt6.QtWidgets import QHBoxLayout, QPushButton, QLabel, QVBoxLayout, QWidget, QCheckBox, QGraphicsOpacityEffect, \
     QFrame, QTextEdit
 
-from player.library.constants import PLACEHOLDER_POSTER
+from player.utils import resource_path
+from .constants import get_placeholder_poster
 from player.library.custom_widgets import ClickableStarFilter, StarRatingDisplay, TagButton
 from player.library.flow_layout import FlowLayout
 
@@ -81,9 +82,14 @@ class FilmCard(QFrame):
         self.poster_label = QLabel()
         self.poster_label.setFixedSize(poster_w, poster_h)
         self.poster_label.setScaledContents(True)
-        pix = QPixmap(self.film_data.get("poster", PLACEHOLDER_POSTER)).scaled(poster_w, poster_h,
-                                                                               Qt.AspectRatioMode.KeepAspectRatio,
-                                                                               Qt.TransformationMode.SmoothTransformation)
+        pixmap_path = resource_path(self.film_data.get("poster") or get_placeholder_poster())
+        pix = QPixmap(pixmap_path).scaled(
+            poster_w, poster_h,
+            Qt.AspectRatioMode.KeepAspectRatio,
+            Qt.TransformationMode.SmoothTransformation
+        )
+        if pix.isNull():
+            print(f"[KINGPLAYER WARNING] Nepodařilo se načíst obrázek: {pixmap_path}")
         self.poster_label.setPixmap(pix)
         main_vbox.addWidget(self.poster_label, alignment=Qt.AlignmentFlag.AlignCenter)
         main_vbox.addStretch(1)
@@ -122,7 +128,7 @@ class FilmCard(QFrame):
         else:
             poster = QLabel()
             poster.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            pixmap_path = self.film_data.get("poster") or PLACEHOLDER_POSTER
+            pixmap_path = resource_path(self.film_data.get("poster") or get_placeholder_poster())
             pix = QPixmap(pixmap_path)
             poster.setPixmap(
                 pix.scaled(450, 500, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
@@ -138,7 +144,7 @@ class FilmCard(QFrame):
         if self.web_view:
             btn_mute = QPushButton()
             btn_mute.setObjectName("muteButton")
-            btn_mute.setIcon(QIcon("assets/icons/mute.svg"))
+            btn_mute.setIcon(QIcon(resource_path("assets/icons/mute.svg")))
             btn_mute.setCheckable(True)
             btn_mute.setChecked(True)
             # Funkce pro přepnutí zvuku a ikony
@@ -151,7 +157,7 @@ class FilmCard(QFrame):
                         new_url = url.replace("mute=1", "mute=0")
                         self.web_view.setUrl(QUrl(new_url))
                         self.web_view.page().setAudioMuted(False)
-                    icon_path = "assets/icons/mute.svg" if muted else "assets/icons/unmute.svg"
+                    icon_path = resource_path("assets/icons/mute.svg") if muted else resource_path("assets/icons/unmute.svg")
                     btn_mute.setIcon(QIcon(icon_path))
 
             btn_mute.toggled.connect(toggle_mute)
@@ -212,10 +218,12 @@ class FilmCard(QFrame):
         if self.year_label.text() != new_year:
             self.year_label.setText(new_year)
 
-        pixmap_path = film_data.get("poster") or PLACEHOLDER_POSTER
-        pix = QPixmap(pixmap_path).scaled(175, 225,
-                                          Qt.AspectRatioMode.KeepAspectRatio,
-                                          Qt.TransformationMode.SmoothTransformation)
+        pixmap_path = resource_path(film_data.get("poster") or get_placeholder_poster())
+        pix = QPixmap(pixmap_path).scaled(
+            175, 225,
+            Qt.AspectRatioMode.KeepAspectRatio,
+            Qt.TransformationMode.SmoothTransformation
+        )
         self.poster_label.setPixmap(pix)
 
         self.rating_widget.setRating(film_data.get("rating", 0))
