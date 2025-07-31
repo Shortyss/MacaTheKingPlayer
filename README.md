@@ -4,8 +4,8 @@ ENG
 
 A minimalist yet powerful local movie player for the Linux environment. The player's main feature is its library, where you can find all the information about your movies, including trailers and posters. No more guessing what a movie is about!
 
-https://github.com/Shortyss/MacaTheKingPlayer/blob/master/player1.png
-https://github.com/Shortyss/MacaTheKingPlayer/blob/master/player5.png
+![Screenshot player](https://github.com/Shortyss/MacaTheKingPlayer/blob/master/player1.png)
+![Screenshot player](https://github.com/Shortyss/MacaTheKingPlayer/blob/master/player5.png)
 
 ## Key Features
 * **Video Playback:** Support for all common formats thanks to the FFmpeg backend (MKV, MP4, AVI, and more).
