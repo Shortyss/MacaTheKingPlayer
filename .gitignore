@@ -1,8 +1,0 @@
-/build/
-/dist/
-*.spec
-*.AppImage
-*.db
-__pycache__/
-.venv/
-.idea/
